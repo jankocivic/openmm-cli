@@ -14,9 +14,16 @@ dependencies = [
 [project.scripts]
 openmm-cli = "openmm_cli.cli:app"
 
+[tool.uv]
+package = true
+
 [dependency-groups]
 dev = [
     "black>=26.3.0",
     "pytest>=9.0.2",
     "ruff>=0.15.5",
 ]
+
+[tool.black]
+target-version = ["py311"]
+line-length = 88
