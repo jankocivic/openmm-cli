@@ -1,0 +1,13 @@
+# Python cache
+__pycache__/
+./src/openmm_cli/__pycache__
+./src/openmm_cli/commands/run/__pycache__
+./src/openmm_cli/commands/__pycache__
+
+# Virtual environment (.venv)
+src/openmm_cli.egg-info
+uv.lock
+.venv/
+
+
+

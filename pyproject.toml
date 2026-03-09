@@ -1,0 +1,22 @@
+[project]
+name = "openmm-cli"
+version = "0.1.0"
+description = "Command line interface for running OpenMM simulations"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "matplotlib>=3.10.8",
+    "mdtraj>=1.11.1.post1",
+    "numpy>=2.4.2",
+    "openmm>=8.4.0.post2",
+    "typer>=0.24.1",
+]
+[project.scripts]
+openmm-cli = "openmm_cli.cli:app"
+
+[dependency-groups]
+dev = [
+    "black>=26.3.0",
+    "pytest>=9.0.2",
+    "ruff>=0.15.5",
+]
