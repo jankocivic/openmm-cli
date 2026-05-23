@@ -1,0 +1,255 @@
+"""Run an MD simulation from a YAML config."""
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+import mdtraj as md
+import openmm as mm
+import yaml
+from openmm import app, unit
+
+from .config import (
+    BarostatConfig,
+    Config,
+    DynamicsStage,
+    IntegratorConfig,
+    MinimizationStage,
+    PositionalRestraint,
+)
+
+
+# ---- Construction helpers --------------------------------------------------
+
+def build_system(cfg: Config):
+    """Load AMBER topology + coordinates and build the System."""
+    prmtop = app.AmberPrmtopFile(str(cfg.system.topology))
+    inpcrd = app.AmberInpcrdFile(str(cfg.system.coordinates))
+
+    ss = cfg.system_settings
+    kwargs = {
+        "nonbondedMethod": getattr(app, ss.nonbonded_method),
+        "rigidWater": ss.rigid_water,
+    }
+    if ss.nonbonded_method != "NoCutoff":
+        kwargs["nonbondedCutoff"] = ss.nonbonded_cutoff
+    if ss.constraints is not None:
+        kwargs["constraints"] = getattr(app, ss.constraints)
+    if ss.hydrogen_mass is not None:
+        kwargs["hydrogenMass"] = ss.hydrogen_mass
+
+    system = prmtop.createSystem(**kwargs)
+    return prmtop, inpcrd, system
+
+
+def build_integrator(cfg: IntegratorConfig) -> mm.Integrator:
+    if cfg.type == "LangevinMiddle":
+        return mm.LangevinMiddleIntegrator(cfg.temperature, cfg.friction, cfg.timestep)
+    if cfg.type == "Langevin":
+        return mm.LangevinIntegrator(cfg.temperature, cfg.friction, cfg.timestep)
+    if cfg.type == "Verlet":
+        return mm.VerletIntegrator(cfg.timestep)
+    raise ValueError(f"Unknown integrator type: {cfg.type}")
+
+
+def build_platform(cfg: Config):
+    platform = mm.Platform.getPlatformByName(cfg.platform.name)
+    props: dict[str, str] = {}
+    if cfg.platform.name in ("CUDA", "OpenCL"):
+        props[f"{cfg.platform.name}Precision"] = cfg.platform.precision
+        if cfg.platform.device_index is not None:
+            props[f"{cfg.platform.name}DeviceIndex"] = cfg.platform.device_index
+    return platform, props
+
+
+# ---- Restraints ------------------------------------------------------------
+
+def _select_atoms(omm_topology, selection: str):
+    mdt_top = md.Topology.from_openmm(omm_topology)
+    indices = mdt_top.select(selection)
+    if len(indices) == 0:
+        raise ValueError(f"Selection {selection!r} matched no atoms")
+    return [int(i) for i in indices]
+
+
+def _make_positional_restraint_force(r: PositionalRestraint, omm_topology, positions):
+    force = mm.CustomExternalForce("0.5*k*((x-x0)^2 + (y-y0)^2 + (z-z0)^2)")
+    force.addGlobalParameter("k", r.force_constant)
+    force.addPerParticleParameter("x0")
+    force.addPerParticleParameter("y0")
+    force.addPerParticleParameter("z0")
+
+    for i in _select_atoms(omm_topology, r.selection):
+        p = positions[i].value_in_unit(unit.nanometer)
+        force.addParticle(i, [p[0], p[1], p[2]])
+    return force
+
+
+def apply_restraints(simulation, system, omm_topology, restraints, prev_indices):
+    for idx in sorted(prev_indices, reverse=True):
+        system.removeForce(idx)
+
+    new_indices: list[int] = []
+    if restraints:
+        state = simulation.context.getState(getPositions=True)
+        positions = state.getPositions()
+        for r in restraints:
+            if r.type == "positional":
+                f = _make_positional_restraint_force(r, omm_topology, positions)
+                new_indices.append(system.addForce(f))
+
+    simulation.context.reinitialize(preserveState=True)
+    return new_indices
+
+
+# ---- Barostat handling -----------------------------------------------------
+
+def _find_barostat(system):
+    for i, f in enumerate(system.getForces()):
+        if isinstance(f, mm.MonteCarloBarostat):
+            return i, f
+    return None, None
+
+
+def configure_barostat(simulation, system, cfg: Config, stage: DynamicsStage):
+    idx, barostat = _find_barostat(system)
+    if barostat is None:
+        return
+
+    default_b = cfg.defaults.barostat
+    stage_b: BarostatConfig | None = stage.barostat or default_b
+
+    if stage.disable_barostat:
+        barostat.setFrequency(0)
+    elif stage_b is not None:
+        barostat.setFrequency(stage_b.frequency)
+        barostat.setDefaultPressure(stage_b.pressure)
+        T = (stage.integrator.temperature if stage.integrator
+             else cfg.defaults.integrator.temperature)
+        barostat.setDefaultTemperature(T)
+
+    simulation.context.reinitialize(preserveState=True)
+
+
+# ---- Reporters -------------------------------------------------------------
+
+def build_reporters(reporters_cfg, stage_steps: int, output_dir: Path):
+    out = []
+    if reporters_cfg.trajectory:
+        path = output_dir / reporters_cfg.trajectory.file
+        out.append(app.DCDReporter(str(path), reporters_cfg.trajectory.interval))
+    if reporters_cfg.state:
+        path = output_dir / reporters_cfg.state.file
+        out.append(app.StateDataReporter(
+            str(path), reporters_cfg.state.interval,
+            step=True, time=True,
+            potentialEnergy=True, kineticEnergy=True, totalEnergy=True,
+            temperature=True, volume=True, density=True, speed=True,
+        ))
+    if reporters_cfg.checkpoint:
+        path = output_dir / reporters_cfg.checkpoint.file
+        out.append(app.CheckpointReporter(str(path), reporters_cfg.checkpoint.interval))
+    out.append(app.StateDataReporter(
+        sys.stdout, max(1, stage_steps // 20),
+        step=True, progress=True, totalSteps=stage_steps,
+        temperature=True, speed=True, remainingTime=True,
+    ))
+    return out
+
+
+# ---- State I/O -------------------------------------------------------------
+
+def save_state(simulation, path: Path):
+    state = simulation.context.getState(
+        getPositions=True, getVelocities=True, getEnergy=True,
+        getParameters=True, enforcePeriodicBox=True,
+    )
+    with open(path, "w") as f:
+        f.write(mm.XmlSerializer.serialize(state))
+
+
+# ---- Stage drivers ---------------------------------------------------------
+
+def run_minimization(simulation, stage: MinimizationStage, output_dir: Path):
+    print(f"  Minimizing (max {stage.max_iterations or 'unlimited'} iterations, "
+          f"tolerance {stage.tolerance})")
+    simulation.minimizeEnergy(
+        maxIterations=stage.max_iterations,
+        tolerance=stage.tolerance,
+    )
+    save_state(simulation, output_dir / f"{stage.name}.xml")
+
+
+def run_dynamics(simulation, system, prmtop, cfg: Config, stage: DynamicsStage,
+                 prev_restraint_indices: list[int], output_dir: Path) -> list[int]:
+    if stage.integrator is not None and hasattr(simulation.integrator, "setTemperature"):
+        simulation.integrator.setTemperature(stage.integrator.temperature)
+
+    configure_barostat(simulation, system, cfg, stage)
+
+    new_restraint_indices = apply_restraints(
+        simulation, system, prmtop.topology, stage.restraints, prev_restraint_indices
+    )
+
+    if stage.initialize_velocities:
+        T = (stage.integrator.temperature if stage.integrator
+             else cfg.defaults.integrator.temperature)
+        simulation.context.setVelocitiesToTemperature(T)
+
+    simulation.reporters.clear()
+    for r in build_reporters(stage.reporters, stage.steps, output_dir):
+        simulation.reporters.append(r)
+
+    print(f"  Running {stage.steps} steps")
+    simulation.step(stage.steps)
+
+    save_state(simulation, output_dir / f"{stage.name}.xml")
+    return new_restraint_indices
+
+
+# ---- Typer command ---------------------------------------------------------
+
+def run(config: Path) -> None:
+    """Run an MD simulation from a YAML config file."""
+    with open(config) as f:
+        raw = yaml.safe_load(f)
+    cfg = Config.model_validate(raw)
+
+    output_dir = cfg.output_dir
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    print(f"Loading topology from {cfg.system.topology}")
+    print(f"Loading coordinates from {cfg.system.coordinates}")
+    prmtop, inpcrd, system = build_system(cfg)
+    print(f"System: {system.getNumParticles()} particles, "
+          f"{system.getNumConstraints()} constraints")
+
+    if cfg.defaults.barostat is not None:
+        b = cfg.defaults.barostat
+        system.addForce(mm.MonteCarloBarostat(
+            b.pressure, cfg.defaults.integrator.temperature, b.frequency,
+        ))
+
+    integrator = build_integrator(cfg.defaults.integrator)
+    platform, plat_props = build_platform(cfg)
+    simulation = app.Simulation(prmtop.topology, system, integrator, platform, plat_props)
+
+    simulation.context.setPositions(inpcrd.positions)
+    if inpcrd.boxVectors is not None:
+        simulation.context.setPeriodicBoxVectors(*inpcrd.boxVectors)
+
+    print(f"Platform: {simulation.context.getPlatform().getName()} "
+          f"({cfg.platform.precision} precision)")
+
+    restraint_indices: list[int] = []
+    for stage in cfg.stages:
+        print(f"\n=== Stage: {stage.name} ({stage.type}) ===")
+        if isinstance(stage, MinimizationStage):
+            run_minimization(simulation, stage, output_dir)
+        elif isinstance(stage, DynamicsStage):
+            restraint_indices = run_dynamics(
+                simulation, system, prmtop, cfg, stage,
+                restraint_indices, output_dir,
+            )
+
+    print("\nAll stages complete.")
