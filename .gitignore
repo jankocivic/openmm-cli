@@ -1,6 +1,6 @@
 # Python cache
 __pycache__/
-./scratch/
+scratch/
 ./src/openmm_cli/__pycache__
 ./src/openmm_cli/commands/run/__pycache__
 ./src/openmm_cli/commands/__pycache__
