@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import sys
+from typing import Annotated
 from pathlib import Path
+import typer
 
 import mdtraj as md
 import openmm as mm
@@ -209,7 +211,7 @@ def run_dynamics(simulation, system, prmtop, cfg: Config, stage: DynamicsStage,
 
 # ---- Typer command ---------------------------------------------------------
 
-def run(config: Path) -> None:
+def run(config: Annotated[Path, typer.Argument(...,help="Path to yaml configuration file.")]) -> None:
     """Run an MD simulation from a YAML config file."""
     with open(config) as f:
         raw = yaml.safe_load(f)
