@@ -5,8 +5,7 @@ __pycache__/
 ./src/openmm_cli/commands/__pycache__
 
 # Virtual environment (.venv)
-src/openmm_cli.egg-info
-uv.lock
+./src/openmm_cli.egg-info
 .venv/
 
 

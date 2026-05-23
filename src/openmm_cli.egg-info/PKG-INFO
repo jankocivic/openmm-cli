@@ -1,0 +1,47 @@
+Metadata-Version: 2.4
+Name: openmm-cli
+Version: 0.1.0
+Summary: Command line interface for running OpenMM simulations
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: matplotlib>=3.10.8
+Requires-Dist: mdtraj>=1.11.1.post1
+Requires-Dist: numpy>=2.4.2
+Requires-Dist: openmm>=8.4.0.post2
+Requires-Dist: pydantic>=2.12.5
+Requires-Dist: pyyaml>=6.0.3
+Requires-Dist: typer>=0.24.1
+Dynamic: license-file
+
+# openmm-cli
+
+A command-line interface for running standard molecular dynamics simulations with OpenMM.
+
+`openmm-cli` provides a simple, scriptable interface for common simulation tasks such as minimization, heating, equilibration, and production runs, with sensible defaults and minimal configuration.
+
+---
+
+## Features
+
+- Simple CLI for common OpenMM workflows
+
+---
+
+## Installation
+
+---
+
+## Quick Start
+
+---
+
+## Acknowledgements 
+
+---
+
+## License 
+
+---
+
+
