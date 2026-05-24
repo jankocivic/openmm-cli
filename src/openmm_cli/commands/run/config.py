@@ -178,9 +178,12 @@ class MinimizationStage(BaseModel):
 
 
 class DynamicsStage(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     name: str
     type: Literal["dynamics"]
     steps: int
+    start_temperature: Optional[unit.Quantity] = None
 
     # Per-stage overrides. None means "use default".
     integrator: Optional[IntegratorConfig] = None
@@ -195,6 +198,8 @@ class DynamicsStage(BaseModel):
 
     restraints: list[PositionalRestraint] = []
     reporters: Reporters = Reporters()
+
+    _v = field_validator("start_temperature", mode="before")(_q)
 
 
 Stage = Annotated[
