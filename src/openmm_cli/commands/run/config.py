@@ -202,11 +202,16 @@ class DynamicsStage(BaseModel):
     _v = field_validator("start_temperature", mode="before")(_q)
 
 
+class AnalysisStage(BaseModel):
+    name: str
+    type: Literal["analysis"]
+    command: str           # which trajectory command, e.g. "rmsd"
+    args: dict = {}        # YAML keys match the command's CLI flags
+
 Stage = Annotated[
-    Union[MinimizationStage, DynamicsStage],
+    Union[MinimizationStage, DynamicsStage, AnalysisStage],
     Field(discriminator="type"),
 ]
-
 
 # ---- Root ------------------------------------------------------------------
 
