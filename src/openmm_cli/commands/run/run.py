@@ -25,8 +25,9 @@ from .config import (
 
 def build_system(cfg: Config):
     """Load AMBER topology + coordinates and build the System."""
-    prmtop = app.AmberPrmtopFile(str(cfg.system.topology))
-    inpcrd = app.AmberInpcrdFile(str(cfg.system.coordinates))
+    parm7 = app.AmberPrmtopFile(str(cfg.system.parm7))
+    pdb = (app.PDBFile(str(cfg.system.pdb))
+              if cfg.system.pdb is not None else None)
 
     ss = cfg.system_settings
     kwargs = {
@@ -40,8 +41,8 @@ def build_system(cfg: Config):
     if ss.hydrogen_mass is not None:
         kwargs["hydrogenMass"] = ss.hydrogen_mass
 
-    system = prmtop.createSystem(**kwargs)
-    return prmtop, inpcrd, system
+    system = parm7.createSystem(**kwargs)
+    return parm7, pdb, system
 
 
 def build_integrator(cfg: IntegratorConfig) -> mm.Integrator:
@@ -164,7 +165,7 @@ def build_reporters(reporters_cfg, stage_steps: int, output_dir: Path):
 def save_state(simulation, path: Path):
     state = simulation.context.getState(
         getPositions=True, getVelocities=True, getEnergy=True,
-        getParameters=True, enforcePeriodicBox=True,
+        enforcePeriodicBox=True,
     )
     with open(path, "w") as f:
         f.write(mm.XmlSerializer.serialize(state))
@@ -172,17 +173,20 @@ def save_state(simulation, path: Path):
 
 # ---- Stage drivers ---------------------------------------------------------
 
-def run_minimization(simulation, stage: MinimizationStage, output_dir: Path):
-    print(f"  Minimizing (max {stage.max_iterations or 'unlimited'} iterations, "
-          f"tolerance {stage.tolerance})")
+def run_minimization(simulation, system, prmtop, stage, prev_restraint_indices, output_dir):
+    new_restraint_indices = apply_restraints(
+        simulation, system, prmtop.topology, stage.restraints, prev_restraint_indices
+    )
+    print(f"  Minimizing (max {stage.max_iterations or 'unlimited'} iterations)")
     simulation.minimizeEnergy(
         maxIterations=stage.max_iterations,
         tolerance=stage.tolerance,
     )
     save_state(simulation, output_dir / f"{stage.name}.xml")
+    return new_restraint_indices
 
 
-def run_dynamics(simulation, system, prmtop, cfg: Config, stage: DynamicsStage,
+def run_dynamics(simulation, system, parm7, cfg: Config, stage: DynamicsStage,
                  prev_restraint_indices: list[int], output_dir: Path) -> list[int]:
     if stage.integrator is not None and hasattr(simulation.integrator, "setTemperature"):
         simulation.integrator.setTemperature(stage.integrator.temperature)
@@ -190,7 +194,7 @@ def run_dynamics(simulation, system, prmtop, cfg: Config, stage: DynamicsStage,
     configure_barostat(simulation, system, cfg, stage)
 
     new_restraint_indices = apply_restraints(
-        simulation, system, prmtop.topology, stage.restraints, prev_restraint_indices
+        simulation, system, parm7.topology, stage.restraints, prev_restraint_indices
     )
 
     if stage.initialize_velocities:
@@ -203,6 +207,7 @@ def run_dynamics(simulation, system, prmtop, cfg: Config, stage: DynamicsStage,
         simulation.reporters.append(r)
 
     print(f"  Running {stage.steps} steps")
+    simulation.currentStep = 0
     simulation.step(stage.steps)
 
     save_state(simulation, output_dir / f"{stage.name}.xml")
@@ -220,9 +225,14 @@ def run(config: Annotated[Path, typer.Argument(...,help="Path to yaml configurat
     output_dir = cfg.output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Loading topology from {cfg.system.topology}")
-    print(f"Loading coordinates from {cfg.system.coordinates}")
-    prmtop, inpcrd, system = build_system(cfg)
+    print(f"Loading topology from {cfg.system.parm7}")
+    if cfg.system.restart_from != None:
+        print(f"Loading coordinates from {cfg.system.restart_from}")
+    else:
+        print(f"Loading coordinates from {cfg.system.pdb}")
+
+
+    parm7, pdb, system = build_system(cfg)
     print(f"System: {system.getNumParticles()} particles, "
           f"{system.getNumConstraints()} constraints")
 
@@ -234,11 +244,17 @@ def run(config: Annotated[Path, typer.Argument(...,help="Path to yaml configurat
 
     integrator = build_integrator(cfg.defaults.integrator)
     platform, plat_props = build_platform(cfg)
-    simulation = app.Simulation(prmtop.topology, system, integrator, platform, plat_props)
+    simulation = app.Simulation(parm7.topology, system, integrator, platform, plat_props)
 
-    simulation.context.setPositions(inpcrd.positions)
-    if inpcrd.boxVectors is not None:
-        simulation.context.setPeriodicBoxVectors(*inpcrd.boxVectors)
+    if pdb is not None:
+        simulation.context.setPositions(pdb.positions)
+        if pdb.topology.getPeriodicBoxVectors() is not None:
+            simulation.context.setPeriodicBoxVectors(*pdb.topology.getPeriodicBoxVectors())
+
+    if cfg.system.restart_from is not None:
+        with open(cfg.system.restart_from) as f:
+            state = mm.XmlSerializer.deserialize(f.read())
+        simulation.context.setState(state)
 
     print(f"Platform: {simulation.context.getPlatform().getName()} "
           f"({cfg.platform.precision} precision)")
@@ -247,10 +263,12 @@ def run(config: Annotated[Path, typer.Argument(...,help="Path to yaml configurat
     for stage in cfg.stages:
         print(f"\n=== Stage: {stage.name} ({stage.type}) ===")
         if isinstance(stage, MinimizationStage):
-            run_minimization(simulation, stage, output_dir)
+            restraint_indices = run_minimization(
+                simulation, system, parm7, stage, restraint_indices, output_dir,
+            )
         elif isinstance(stage, DynamicsStage):
             restraint_indices = run_dynamics(
-                simulation, system, prmtop, cfg, stage,
+                simulation, system, parm7, cfg, stage,
                 restraint_indices, output_dir,
             )
 
