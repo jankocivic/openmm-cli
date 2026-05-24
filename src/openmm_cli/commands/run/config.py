@@ -1,10 +1,5 @@
 """
 Configuration models for the MD runner.
-
-The single non-obvious bit is unit handling: YAML strings like "4 fs",
-"1.0 nm", "1000 kJ/mol/nm^2" are parsed into openmm.unit.Quantity at
-validation time. That way unit errors surface when the config is loaded,
-not when OpenMM finally complains five function calls deep.
 """
 from __future__ import annotations
 
@@ -13,7 +8,7 @@ from pathlib import Path
 from typing import Annotated, Literal, Optional, Union
 
 from openmm import unit
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 # ---- Unit parsing -----------------------------------------------------------
@@ -78,8 +73,17 @@ def _q(v):
 
 class SystemSources(BaseModel):
     """What we're simulating. Both AMBER files."""
-    topology: Path
-    coordinates: Path
+    parm7: Path
+    pdb: Optional[Path] = None
+    restart_from: Optional[Path] = None
+
+    @model_validator(mode="after")
+    def _need_coords_or_restart(self):
+        if self.pdb is None and self.restart_from is None:
+            raise ValueError(
+                "Must provide either a PDB file (pdb) or a state file (restart_from)"
+            )
+        return self
 
 
 class SystemSettings(BaseModel):
@@ -100,7 +104,7 @@ class SystemSettings(BaseModel):
 # ---- Platform --------------------------------------------------------------
 
 class PlatformConfig(BaseModel):
-    name: Literal["CUDA", "OpenCL", "CPU", "Reference"] = "CUDA"
+    name: Literal["CUDA", "OpenCL", "CPU", "Reference"] = "CPU"
     precision: Literal["single", "mixed", "double"] = "mixed"
     device_index: Optional[str] = None  # e.g. "0" or "0,1"
 
@@ -168,6 +172,7 @@ class MinimizationStage(BaseModel):
     type: Literal["minimization"]
     max_iterations: int = 0  # 0 = until convergence
     tolerance: unit.Quantity = "10 kJ/mol/nm"
+    restraints: list[PositionalRestraint] = []
 
     _v = field_validator("tolerance", mode="before")(_q)
 
