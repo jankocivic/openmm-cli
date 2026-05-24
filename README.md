@@ -13,6 +13,7 @@ A command-line interface for running standard molecular dynamics simulations wit
 - Run a full MD workflow from a single YAML config (minimize → heat → equilibrate → production)
 - Per-stage overrides for temperature, barostat, restraints, and reporters
 - Restart from saved states
+- Inline analysis stages — chain trajectory commands directly into the YAML
 - Trajectory analysis and processing commands (RMSD, RMSF, distances, dihedrals, H-bonds, imaging, centering, stripping, format conversion)
 - Built on [OpenMM](https://openmm.org) and [mdtraj](https://mdtraj.org)
 
@@ -68,6 +69,15 @@ stages:
     reporters:
       trajectory: { file: prod.dcd, interval: 5000 }
       state:      { file: prod.csv, interval: 1000 }
+
+  - name: rmsd
+    type: analysis
+    command: rmsd
+    args:
+      trajectory: prod.dcd
+      top: ../protein.parm7
+      sel: "name CA"
+      out: rmsd.csv
 ```
 
 Run it:
