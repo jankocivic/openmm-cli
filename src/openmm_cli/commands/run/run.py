@@ -186,29 +186,43 @@ def run_minimization(simulation, system, prmtop, stage, prev_restraint_indices, 
     return new_restraint_indices
 
 
-def run_dynamics(simulation, system, parm7, cfg: Config, stage: DynamicsStage,
-                 prev_restraint_indices: list[int], output_dir: Path) -> list[int]:
-    if stage.integrator is not None and hasattr(simulation.integrator, "setTemperature"):
-        simulation.integrator.setTemperature(stage.integrator.temperature)
+def run_dynamics(simulation, system, parm7, cfg, stage, prev_restraint_indices, output_dir):
+    end_T = (stage.integrator.temperature if stage.integrator
+             else cfg.defaults.integrator.temperature)
+    start_T = stage.start_temperature  # None if not heating
+    initial_T = start_T if start_T is not None else end_T
+
+    if hasattr(simulation.integrator, "setTemperature"):
+        simulation.integrator.setTemperature(initial_T)
 
     configure_barostat(simulation, system, cfg, stage)
-
     new_restraint_indices = apply_restraints(
         simulation, system, parm7.topology, stage.restraints, prev_restraint_indices
     )
 
     if stage.initialize_velocities:
-        T = (stage.integrator.temperature if stage.integrator
-             else cfg.defaults.integrator.temperature)
-        simulation.context.setVelocitiesToTemperature(T)
+        simulation.context.setVelocitiesToTemperature(initial_T)
 
     simulation.reporters.clear()
     for r in build_reporters(stage.reporters, stage.steps, output_dir):
         simulation.reporters.append(r)
-
-    print(f"  Running {stage.steps} steps")
     simulation.currentStep = 0
-    simulation.step(stage.steps)
+
+    if start_T is not None:
+        # Heating ramp: 100 chunks, temperature stepped between each
+        n_chunks = 100
+        chunk = stage.steps // n_chunks
+        print(f"  Heating from {start_T} to {end_T} over {stage.steps} steps")
+        for i in range(n_chunks):
+            T = start_T + (end_T - start_T) * (i + 1) / n_chunks
+            simulation.integrator.setTemperature(T)
+            simulation.step(chunk)
+        leftover = stage.steps - chunk * n_chunks
+        if leftover:
+            simulation.step(leftover)
+    else:
+        print(f"  Running {stage.steps} steps")
+        simulation.step(stage.steps)
 
     save_state(simulation, output_dir / f"{stage.name}.xml")
     return new_restraint_indices
