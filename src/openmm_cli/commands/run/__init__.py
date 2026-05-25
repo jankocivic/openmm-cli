@@ -1,2 +1,1 @@
-# run/__init__.py
-from .run import run
+from .run import command
