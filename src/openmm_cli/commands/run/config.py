@@ -72,17 +72,28 @@ def _q(v):
 # ---- System ----------------------------------------------------------------
 
 class SystemSources(BaseModel):
-    """What we're simulating. Both AMBER files."""
-    parm7: Path
-    pdb: Optional[Path] = None
+    """What we're simulating.
+
+    Supported combinations:
+      - AMBER topology (.parm7/.prmtop) + coordinates (.inpcrd or .pdb), or restart_from
+      - OpenMM PDB topology (.pdb) + forcefield XML list
+    """
+    topology: Path
+    coordinates: Optional[Path] = None
     restart_from: Optional[Path] = None
+    forcefield: Optional[list[str]] = None   # e.g. ["amber14-all.xml", "amber14/tip3pfb.xml"]
 
     @model_validator(mode="after")
-    def _need_coords_or_restart(self):
-        if self.pdb is None and self.restart_from is None:
-            raise ValueError(
-                "Must provide either a PDB file (pdb) or a state file (restart_from)"
-            )
+    def _validate_inputs(self):
+        suffix = self.topology.suffix.lower()
+        if suffix in (".parm7", ".prmtop"):
+            if self.coordinates is None and self.restart_from is None:
+                raise ValueError("AMBER topology requires `coordinates` or `restart_from`")
+        elif suffix == ".pdb":
+            if self.forcefield is None:
+                raise ValueError("PDB topology requires a `forcefield` list")
+        else:
+            raise ValueError(f"Unsupported topology format: {suffix}")
         return self
 
 
@@ -208,10 +219,12 @@ class AnalysisStage(BaseModel):
     command: str           # which trajectory command, e.g. "rmsd"
     args: dict = {}        # YAML keys match the command's CLI flags
 
+
 Stage = Annotated[
     Union[MinimizationStage, DynamicsStage, AnalysisStage],
     Field(discriminator="type"),
 ]
+
 
 # ---- Root ------------------------------------------------------------------
 
@@ -222,5 +235,3 @@ class Config(BaseModel):
     defaults: Defaults = Defaults()
     output_dir: Path = Path("output")
     stages: list[Stage]
-
-

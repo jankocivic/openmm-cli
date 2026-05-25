@@ -4,14 +4,14 @@ A command-line interface for running standard molecular dynamics simulations wit
 
 `openmm-cli` provides a simple interface for common simulation tasks such as minimization, heating, equilibration, and production runs, with sensible defaults and minimal configuration.
 
-> **Status: work in progress.** The current biggest limitation is that the MD runner accepts only AMBER `.parm7` topologies, with coordinates supplied as either an AMBER `.inpcrd` or a `.pdb` file. Support for other topology formats (GROMACS, CHARMM, OpenMM XML) is planned.
+> **Status: work in progress.** APIs and config schema may change. The tool currently supports AMBER topologies (`.parm7` / `.prmtop`) and OpenMM force field workflows (PDB topology + force field XMLs); other formats (GROMACS, CHARMM, OpenMM XML system files) are planned.
 
 ---
 
 ## Features
 
 - Run a full MD workflow from a single YAML config (minimize → heat → equilibrate → production)
-- Per-stage overrides for temperature, barostat, restraints, and reporters
+- Supports restraints
 - Restart from saved states
 - Trajectory analysis and processing commands (RMSD, RMSF, distances, dihedrals, H-bonds, imaging, centering, stripping, format conversion)
 - System preparation commands (PDB cleanup, solvation, ion placement)
@@ -35,7 +35,7 @@ pip install -e .
 
 Requires Python 3.10+ and a working OpenMM installation (CUDA recommended for production).
 
-> **Platform note:** `openmm-cli` has so far only been tested on Windows via WSL. In principle it should also work on Linux and macOS,  but neither has been verified.
+> **Platform note:** `openmm-cli` has so far only been tested on Linux. It should work on macOS in principle, and on Windows via WSL, but neither has been verified.
 
 ---
 
@@ -101,21 +101,88 @@ See `openmm-cli --help` and `openmm-cli trajectory --help` for the full command 
 
 ---
 
+## Specifying the system
+ 
+The `system` block supports a few input combinations:
+ 
+**AMBER topology + AMBER coordinates**:
+ 
+```yaml
+system:
+  topology: protein.parm7
+  coordinates: protein.inpcrd
+```
+ 
+**AMBER topology + PDB coordinates**:
+ 
+```yaml
+system:
+  topology: protein.parm7
+  coordinates: protein.pdb
+```
+ 
+**PDB topology + OpenMM force field** — no AMBER tooling required; the PDB carries the topology, and OpenMM's bundled force field XMLs parametrise it:
+ 
+```yaml
+system:
+  topology: protein.pdb
+  forcefield:
+    - amber14-all.xml
+    - amber14/tip3pfb.xml
+```
+ 
+**Restarting from a previous run** — load positions, velocities, and box vectors from a saved state. Works alongside any topology source above; `coordinates` becomes optional since the state XML provides positions:
+ 
+```yaml
+system:
+  topology: protein.parm7
+  restart_from: previous_run/production.xml
+```
+ 
+Set `initialize_velocities: false` on the first stage of a restart run, or the loaded velocities will be discarded.
+ 
+---
+
+## Analysis stages
+
+A stage with `type: analysis` runs one of the `trajectory` commands, using the same arguments and options that command accepts on the CLI:
+
+```yaml
+- name: rmsd
+  type: analysis
+  command: rmsd                # which trajectory command to run
+  args:
+    trajectory: prod.dcd
+    top: ../protein.parm7
+    sel: "name CA"
+    out: rmsd.csv
+```
+
+Keys under `args` mirror the command's CLI flag names — `--sel` becomes `sel:`, `--top` becomes `top:`, `--a` becomes `a:`, and so on. Whatever you'd type on the CLI works here too; running `openmm-cli trajectory <command> --help` shows the available options for any analysis command.
+
+The analysis command runs with its working directory set to `output_dir`, so trajectory paths and output paths are resolved relative to it. Files outside `output_dir` (typically the input topology) need a relative path back out, which is why `top: ../protein.parm7` in the example.
+
+Analysis stages can be interleaved with dynamics stages, but a common pattern is one or more at the end of the workflow to compute standard observables on the production trajectory.
+
+---
+
 ## Related projects
 
-`openmm-cli` is inspired by [**OMMProtocol**](https://github.com/insilichem/ommprotocol) (Rodríguez-Guerra et al.), which also drives OpenMM through a YAML config organized into stages. Differences from OMMProtocol: `openmm-cli` is built on a modern Python stack (Pydantic for config validation, Typer for the CLI), integrates preparation and trajectory analysis commands, and is structured so new commands can be added by dropping a single file into the right folder — see [Adding a command](#adding-a-command) below.
+`openmm-cli` is inspired by [**OMMProtocol**](https://github.com/insilichem/ommprotocol) (Rodríguez-Guerra et al.), which also drives OpenMM through a YAML config organized into stages. Differences from OMMProtocol: `openmm-cli` is built on a modern Python stack (Pydantic for config validation, Typer for the CLI), integrates preparation and trajectory analysis as commands, and is structured so new commands can be added by dropping a single file into the right folder — see [Adding a command](#adding-a-command) below.
 
 ---
 
 ## Adding a command
- 
+
 Commands are auto-discovered from `src/openmm_cli/commands/`. The discovery rule is uniform at every level:
- 
+
 - A `.py` file in `commands/` becomes a **top-level command** (`openmm-cli <name>`).
 - A folder in `commands/` whose `__init__.py` exposes a `command` function is **also a top-level command** — useful when the command needs supporting modules of its own (this is how `run/` works).
 - A folder in `commands/` whose `__init__.py` does *not* expose `command` becomes a **subgroup**; each `.py` file inside becomes a subcommand (`openmm-cli <group> <name>`).
+- Files and folders starting with `_` are skipped.
+
 Current layout:
- 
+
 ```
 src/openmm_cli/commands/
 ├── run/                  # `openmm-cli run`
@@ -133,19 +200,19 @@ src/openmm_cli/commands/
     ├── distance.py
     └── ...
 ```
- 
-Example new trajectory command:
- 
+
+Example of a new subcommand of the trajectory command:
+
 ```python
 # src/openmm_cli/commands/trajectory/my_analysis.py
 """Short description of what the command does."""
 from pathlib import Path
 from typing import Annotated
- 
+
 import mdtraj as md
 import typer
- 
- 
+
+
 def command(
     trajectory: Annotated[Path, typer.Argument(help="Input trajectory.")],
     topology: Annotated[Path, typer.Option("--top")],
@@ -156,20 +223,20 @@ def command(
     traj = md.load(str(trajectory), top=str(topology))
     # ... your logic here
 ```
- 
+
 No `cli.py` edits required. The new command appears as `openmm-cli trajectory my_analysis`.
- 
+
 Conventions worth following:
- 
+
 - **Name the function `command`.** Auto-discovery looks for this exact attribute.
 - **Reuse flag names across commands** (`--top`, `--out`, `--sel`, `--ref`) so users don't have to relearn them.
 - **Add a docstring to each group's `__init__.py`**; it becomes the `--help` text for the group.
+
 ---
 
 ## Acknowledgements
 
-Built on [OpenMM](https://openmm.org) for the simulation engine, [mdtraj](https://mdtraj.org) for trajectory analysis, [Pydantic](https://pydantic.dev) for config validation, and [Typer](https://typer.tiangolo.com) for the CLI.
-
+Built on [OpenMM](https://openmm.org) for the simulation engine, [mdtraj](https://mdtraj.org) for trajectory analysis, [PDBFixer](https://github.com/openmm/pdbfixer) for system preparation, [Pydantic](https://pydantic.dev) for config validation, and [Typer](https://typer.tiangolo.com) for the CLI.
 ---
 
 ## License
