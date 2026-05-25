@@ -49,7 +49,9 @@ Requires Python 3.10+ and a working OpenMM installation (CUDA recommended for pr
 
 ## Quick Start
 
-Write a `config.yaml`:
+See `openmm-cli --help`, `openmm-cli trajectory --help` and `openmm-cli prepare --help` for the full command list.
+
+For running an MD simulation protocol write a `config.yaml`:
 
 ```yaml
 system:
@@ -104,8 +106,6 @@ openmm-cli trajectory rmsd     output/prod.dcd --top protein.parm7 --sel "name C
 openmm-cli trajectory distance output/prod.dcd --top protein.parm7 \
     --a "resname LIG" --b "resid 42 and name CA"
 ```
-
-See `openmm-cli --help` and `openmm-cli trajectory --help` for the full command list.
 
 ---
 

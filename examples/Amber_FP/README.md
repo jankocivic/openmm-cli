@@ -8,7 +8,7 @@
    - **Minimize** energy.
    - **Heat** from 100 K to 300 K over 10 ps under NVT, with heavy-atom restraints (1000 kJ/mol/nm²) keeping the protein essentially fixed.
    - **Equilibrate** at 300 K and 1 atm for 20 ps under NPT, with looser CA-only restraints (100 kJ/mol/nm²) allowing side-chain relaxation.
-   - **Production** at 300 K and 1 atm for 50 ps, no restraints; trajectory written every 1 ps.
+   - **Production** at 300 K and 1 atm for 20 ps, no restraints; trajectory written every 1 ps.
 2. **Analyzes** the production trajectory inline:
    - `rmsd` — Cα RMSD vs the starting structure (`rmsd.csv`).
    - `hbonds` — protein hydrogen bonds present in ≥50 % of frames, sorted by occupancy (`hbonds.csv`).

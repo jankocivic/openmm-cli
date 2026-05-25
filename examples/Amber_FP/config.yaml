@@ -58,7 +58,7 @@ stages:
 
   - name: production
     type: dynamics
-    steps: 25000                      # 50 ps
+    steps: 10000                      # 20 ps
     reporters:
       trajectory: { file: prod.pdb, interval: 500 }   # save every 1 ps
       state:      { file: prod.csv, interval: 250 }
