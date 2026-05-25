@@ -166,12 +166,6 @@ Analysis stages can be interleaved with dynamics stages, but a common pattern is
 
 ---
 
-## Related projects
-
-`openmm-cli` is inspired by [**OMMProtocol**](https://github.com/insilichem/ommprotocol) (Rodríguez-Guerra et al.), which also drives OpenMM through a YAML config organized into stages. Differences from OMMProtocol: `openmm-cli` is built on a modern Python stack (Pydantic for config validation, Typer for the CLI), integrates preparation and trajectory analysis as commands, and is structured so new commands can be added by dropping a single file into the right folder — see [Adding a command](#adding-a-command) below.
-
----
-
 ## Adding a command
 
 Commands are auto-discovered from `src/openmm_cli/commands/`. The discovery rule is uniform at every level:
@@ -231,6 +225,12 @@ Conventions worth following:
 - **Name the function `command`.** Auto-discovery looks for this exact attribute.
 - **Reuse flag names across commands** (`--top`, `--out`, `--sel`, `--ref`) so users don't have to relearn them.
 - **Add a docstring to each group's `__init__.py`**; it becomes the `--help` text for the group.
+
+---
+
+## Related projects
+
+`openmm-cli` is inspired by [**OMMProtocol**](https://github.com/insilichem/ommprotocol) (Rodríguez-Guerra et al.), which also drives OpenMM through a YAML config organized into stages. Differences from OMMProtocol: `openmm-cli` is built on a modern Python stack (Pydantic for config validation, Typer for the CLI), integrates preparation and trajectory analysis as commands, and is structured so new commands can be added by dropping a single file into the right folder — see [Adding a command](#adding-a-command) below.
 
 ---
 
