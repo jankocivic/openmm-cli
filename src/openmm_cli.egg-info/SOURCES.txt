@@ -3,7 +3,6 @@ README.md
 pyproject.toml
 src/openmm_cli/__init__.py
 src/openmm_cli/cli.py
-src/openmm_cli/old.cli.py
 src/openmm_cli.egg-info/PKG-INFO
 src/openmm_cli.egg-info/SOURCES.txt
 src/openmm_cli.egg-info/dependency_links.txt
@@ -13,6 +12,7 @@ src/openmm_cli.egg-info/top_level.txt
 src/openmm_cli/commands/__init__.py
 src/openmm_cli/commands/prepare/__init__.py
 src/openmm_cli/commands/prepare/clean.py
+src/openmm_cli/commands/prepare/solvate.py
 src/openmm_cli/commands/run/__init__.py
 src/openmm_cli/commands/run/config.py
 src/openmm_cli/commands/run/run.py
