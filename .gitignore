@@ -1,7 +1,16 @@
 # Python cache
 __pycache__/
 scratch/
-examples/
+examples/*
+!examples/253L/253L.pdb
+!examples/253L/run.sh
+!examples/253L/config.yaml
+!examples/253L/README.md
+!examples/Amber_FP/fp.parm7
+!examples/Amber_FP/fp.pdb
+!examples/Amber_FP/run.sh
+!examples/Amber_FP/config.yaml
+!examples/Amber_FP/README.md
 ./src/openmm_cli/__pycache__
 ./src/openmm_cli/commands/run/__pycache__
 ./src/openmm_cli/commands/__pycache__
