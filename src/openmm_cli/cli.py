@@ -3,27 +3,26 @@ import pkgutil
 
 import typer
 
-from openmm_cli.commands import trajectory as trajectory_pkg
-from openmm_cli.commands.run import run
+from openmm_cli import commands as commands_pkg
 
 app = typer.Typer(help="OpenMM command line interface.")
 
-# Top-level commands
-app.command(name="run")(run)
 
-# Trajectory subcommands -- auto-discovered from commands/trajectory/
-trajectory_app = typer.Typer(help="Trajectory analysis and processing.")
-for _, modname, _ in pkgutil.iter_modules(trajectory_pkg.__path__):
-    if modname.startswith("_"):
-        continue
-    module = importlib.import_module(f"{trajectory_pkg.__name__}.{modname}")
-    if hasattr(module, "command"):
-        trajectory_app.command(name=modname)(module.command)
-app.add_typer(trajectory_app, name="trajectory")
+def _discover(parent_pkg, parent_app):
+    for _, modname, ispkg in pkgutil.iter_modules(parent_pkg.__path__):
+        if modname.startswith("_"):
+            continue
+        module = importlib.import_module(f"{parent_pkg.__name__}.{modname}")
+        if hasattr(module, "command"):
+            parent_app.command(name=modname)(module.command)
+        elif ispkg:
+            help_text = (module.__doc__ or f"{modname} commands").strip()
+            sub_app = typer.Typer(help=help_text)
+            _discover(module, sub_app)
+            parent_app.add_typer(sub_app, name=modname)
 
-# Other groups (empty for now)
-prepare_app = typer.Typer(help="Prepare simulation inputs.")
-app.add_typer(prepare_app, name="prepare")
+
+_discover(commands_pkg, app)
 
 if __name__ == "__main__":
     app()

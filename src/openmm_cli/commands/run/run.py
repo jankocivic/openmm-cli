@@ -264,7 +264,7 @@ def run_analysis(stage: AnalysisStage, output_dir: Path):
 
 # ---- Typer command ---------------------------------------------------------
 
-def run(config: Annotated[Path, typer.Argument(...,help="Path to yaml configuration file.")]) -> None:
+def command(config: Annotated[Path, typer.Argument(...,help="Path to yaml configuration file.")]) -> None:
     """Run an MD simulation from a YAML config file."""
     with open(config) as f:
         raw = yaml.safe_load(f)

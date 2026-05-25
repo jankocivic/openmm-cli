@@ -13,8 +13,8 @@ A command-line interface for running standard molecular dynamics simulations wit
 - Run a full MD workflow from a single YAML config (minimize → heat → equilibrate → production)
 - Per-stage overrides for temperature, barostat, restraints, and reporters
 - Restart from saved states
-- Inline analysis stages — chain trajectory commands directly into the YAML
 - Trajectory analysis and processing commands (RMSD, RMSF, distances, dihedrals, H-bonds, imaging, centering, stripping, format conversion)
+- System preparation commands (PDB cleanup, solvation, ion placement)
 - Built on [OpenMM](https://openmm.org) and [mdtraj](https://mdtraj.org)
 
 ---
@@ -34,6 +34,8 @@ pip install -e .
 ```
 
 Requires Python 3.10+ and a working OpenMM installation (CUDA recommended for production).
+
+> **Platform note:** `openmm-cli` has so far only been tested on Windows via WSL. In principle it should also work on Linux and macOS,  but neither has been verified.
 
 ---
 
@@ -97,6 +99,71 @@ openmm-cli trajectory distance output/prod.dcd --top protein.parm7 \
 
 See `openmm-cli --help` and `openmm-cli trajectory --help` for the full command list.
 
+---
+
+## Related projects
+
+`openmm-cli` is inspired by [**OMMProtocol**](https://github.com/insilichem/ommprotocol) (Rodríguez-Guerra et al.), which also drives OpenMM through a YAML config organized into stages. Differences from OMMProtocol: `openmm-cli` is built on a modern Python stack (Pydantic for config validation, Typer for the CLI), integrates preparation and trajectory analysis commands, and is structured so new commands can be added by dropping a single file into the right folder — see [Adding a command](#adding-a-command) below.
+
+---
+
+## Adding a command
+ 
+Commands are auto-discovered from `src/openmm_cli/commands/`. The discovery rule is uniform at every level:
+ 
+- A `.py` file in `commands/` becomes a **top-level command** (`openmm-cli <name>`).
+- A folder in `commands/` whose `__init__.py` exposes a `command` function is **also a top-level command** — useful when the command needs supporting modules of its own (this is how `run/` works).
+- A folder in `commands/` whose `__init__.py` does *not* expose `command` becomes a **subgroup**; each `.py` file inside becomes a subcommand (`openmm-cli <group> <name>`).
+Current layout:
+ 
+```
+src/openmm_cli/commands/
+├── run/                  # `openmm-cli run`
+│   ├── __init__.py       # exposes `command`
+│   ├── run.py
+│   └── config.py
+├── prepare/              # `openmm-cli prepare ...`
+│   ├── __init__.py
+│   ├── clean.py
+    ├── solvate.py
+    └── ...
+└── trajectory/           # `openmm-cli trajectory ...`
+    ├── __init__.py
+    ├── rmsd.py
+    ├── distance.py
+    └── ...
+```
+ 
+Example new trajectory command:
+ 
+```python
+# src/openmm_cli/commands/trajectory/my_analysis.py
+"""Short description of what the command does."""
+from pathlib import Path
+from typing import Annotated
+ 
+import mdtraj as md
+import typer
+ 
+ 
+def command(
+    trajectory: Annotated[Path, typer.Argument(help="Input trajectory.")],
+    topology: Annotated[Path, typer.Option("--top")],
+    selection: Annotated[str, typer.Option("--sel")] = "name CA",
+    output: Annotated[Path, typer.Option("--out")] = Path("my_analysis.csv"),
+) -> None:
+    """One-line summary used as the command's --help description."""
+    traj = md.load(str(trajectory), top=str(topology))
+    # ... your logic here
+```
+ 
+No `cli.py` edits required. The new command appears as `openmm-cli trajectory my_analysis`.
+ 
+Conventions worth following:
+ 
+- **Name the function `command`.** Auto-discovery looks for this exact attribute.
+- **Reuse flag names across commands** (`--top`, `--out`, `--sel`, `--ref`) so users don't have to relearn them.
+- **Add a docstring to each group's `__init__.py`**; it becomes the `--help` text for the group.
 ---
 
 ## Acknowledgements
