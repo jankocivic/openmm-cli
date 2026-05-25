@@ -154,11 +154,37 @@ def configure_barostat(simulation, system, cfg: Config, stage: DynamicsStage):
 
 # ---- Reporters -------------------------------------------------------------
 
+_TRAJECTORY_REPORTERS = {
+    "dcd": app.DCDReporter,
+    "xtc": app.XTCReporter,
+    "pdb": app.PDBReporter,
+    "pdbx": app.PDBxReporter,
+}
+
+
+def _make_trajectory_reporter(cfg, output_dir: Path):
+    """Build the right reporter for the requested trajectory format."""
+    path = output_dir / cfg.file
+    fmt = (cfg.format or path.suffix.lstrip(".")).lower()
+
+    if fmt in _TRAJECTORY_REPORTERS:
+        return _TRAJECTORY_REPORTERS[fmt](str(path), cfg.interval)
+    if fmt in ("h5", "hdf5"):
+        from mdtraj.reporters import HDF5Reporter
+        return HDF5Reporter(str(path), cfg.interval)
+    if fmt in ("nc", "netcdf"):
+        from mdtraj.reporters import NetCDFReporter
+        return NetCDFReporter(str(path), cfg.interval)
+    raise ValueError(
+        f"Unknown trajectory format {fmt!r} for file {cfg.file}. "
+        f"Supported: dcd, xtc, pdb, pdbx, hdf5/h5, netcdf/nc."
+    )
+
+
 def build_reporters(reporters_cfg, stage_steps: int, output_dir: Path):
     out = []
     if reporters_cfg.trajectory:
-        path = output_dir / reporters_cfg.trajectory.file
-        out.append(app.DCDReporter(str(path), reporters_cfg.trajectory.interval))
+        out.append(_make_trajectory_reporter(reporters_cfg.trajectory, output_dir))
     if reporters_cfg.state:
         path = output_dir / reporters_cfg.state.file
         out.append(app.StateDataReporter(

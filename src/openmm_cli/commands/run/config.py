@@ -163,15 +163,22 @@ class PositionalRestraint(BaseModel):
 
 # ---- Reporters -------------------------------------------------------------
 
+class TrajectoryReporter(BaseModel):
+    file: Path
+    interval: int
+    format: Optional[Literal["dcd", "xtc", "pdb", "pdbx", "hdf5", "h5", "netcdf", "nc"]] = None
+    # If None, format is inferred from the file extension.
+
+
 class ReporterFile(BaseModel):
     file: Path
     interval: int
 
 
 class Reporters(BaseModel):
-    trajectory: Optional[ReporterFile] = None   # DCD
-    state: Optional[ReporterFile] = None        # CSV state data
-    checkpoint: Optional[ReporterFile] = None   # binary checkpoint
+    trajectory: Optional[TrajectoryReporter] = None   # DCD/XTC/PDB/HDF5/NetCDF
+    state: Optional[ReporterFile] = None              # CSV state data
+    checkpoint: Optional[ReporterFile] = None         # binary checkpoint
 
 
 # ---- Stages ----------------------------------------------------------------
