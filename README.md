@@ -51,7 +51,7 @@ system:
 defaults:
   integrator:
     type: LangevinMiddle
-    timestep: 4 fs
+    timestep: 2 fs
     temperature: 300 K
   barostat:
     pressure: 1 atm
