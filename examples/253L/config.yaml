@@ -17,7 +17,7 @@ system_settings:
 
 platform:
   name: CPU             # change to CPU if GPU is not available
-  precision: mixed
+  #precision: mixed
 
 defaults:
   integrator:

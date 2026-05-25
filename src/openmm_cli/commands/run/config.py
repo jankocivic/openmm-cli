@@ -123,7 +123,7 @@ class PlatformConfig(BaseModel):
 # ---- Integrator / barostat -------------------------------------------------
 
 class IntegratorConfig(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True, validate_default=True)
 
     type: Literal["LangevinMiddle", "Langevin", "Verlet"] = "LangevinMiddle"
     timestep: unit.Quantity = "2 fs"
@@ -134,7 +134,7 @@ class IntegratorConfig(BaseModel):
 
 
 class BarostatConfig(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True, validate_default=True)
 
     type: Literal["MonteCarloBarostat"] = "MonteCarloBarostat"
     pressure: unit.Quantity = "1 atm"
@@ -152,7 +152,7 @@ class Defaults(BaseModel):
 # ---- Restraints ------------------------------------------------------------
 
 class PositionalRestraint(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True, validate_default=True)
 
     type: Literal["positional"] = "positional"
     selection: str  # mdtraj-style, e.g. "not water and not element H"
@@ -184,7 +184,7 @@ class Reporters(BaseModel):
 # ---- Stages ----------------------------------------------------------------
 
 class MinimizationStage(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True, validate_default=True)
 
     name: str
     type: Literal["minimization"]
@@ -196,7 +196,7 @@ class MinimizationStage(BaseModel):
 
 
 class DynamicsStage(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True, validate_default=True)
 
     name: str
     type: Literal["dynamics"]
