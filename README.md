@@ -22,16 +22,24 @@ A command-line interface for running standard molecular dynamics simulations wit
 ## Installation
 
 ```bash
-git clone https://github.com/<user>/openmm-cli.git
+git clone https://github.com/jankocivic/openmm-cli.git
 cd openmm-cli
 uv sync
+source .venv/bin/activate # Activate virtual environment, should be done every terminal session
 ```
 
-Or with pip:
+Or with pip inside a virtual environment created with for example conda:
 
 ```bash
 pip install -e .
 ```
+
+Enable autocompletion of commands:
+
+```bash
+openmm-cli --install-completion # Applies only after restarting the terminal
+```
+
 
 Requires Python 3.10+ and a working OpenMM installation (CUDA recommended for production).
 
