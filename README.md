@@ -4,7 +4,7 @@ A command-line interface for running standard molecular dynamics simulations wit
 
 `openmm-cli` provides a simple interface for common simulation tasks such as minimization, heating, equilibration, and production runs, with sensible defaults and minimal configuration.
 
-> **Status: work in progress.** The tool currently supports AMBER topologies (`.parm7` / `.prmtop`) and OpenMM force field workflows (PDB topology + force field XMLs); other formats (GROMACS, CHARMM, ...) are planned.
+> **Status: project in very early stage.** The tool currently supports AMBER topologies (`.parm7` / `.prmtop`) and OpenMM force field workflows (PDB topology + force field XMLs); other formats (GROMACS, CHARMM, ...) are planned.
 
 ---
 
@@ -204,8 +204,8 @@ src/openmm_cli/commands/
 ├── prepare/              # `openmm-cli prepare ...`
 │   ├── __init__.py
 │   ├── clean.py
-    ├── solvate.py
-    └── ...
+│   ├── solvate.py
+│   └── ...
 └── trajectory/           # `openmm-cli trajectory ...`
     ├── __init__.py
     ├── rmsd.py
@@ -248,7 +248,7 @@ Conventions worth following:
 
 ## Related projects
 
-`openmm-cli` is inspired by [**OMMProtocol**](https://github.com/insilichem/ommprotocol) (Rodríguez-Guerra et al.), which also drives OpenMM through a YAML config organized into stages. Differences from OMMProtocol: `openmm-cli` is built on a modern Python stack (Pydantic for config validation, Typer for the CLI), integrates preparation and trajectory analysis as commands, and is structured so new commands can be added by dropping a single file into the right folder — see [Adding a command](#adding-a-command) below.
+`openmm-cli` is inspired by [**OMMProtocol**](https://github.com/insilichem/ommprotocol), which also drives OpenMM through a YAML config organized into stages. Differences from OMMProtocol: `openmm-cli` is built on a modern Python stack (Pydantic for config validation, Typer for the CLI), integrates preparation and trajectory analysis as commands, and is structured so new commands can be added by dropping a single file into the right folder — see [Adding a command](#adding-a-command).
 
 ---
 
