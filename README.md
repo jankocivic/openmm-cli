@@ -101,6 +101,16 @@ See `openmm-cli --help` and `openmm-cli trajectory --help` for the full command 
 
 ---
 
+## Examples
+ 
+The `examples/` directory contains complete, runnable workflows you can use as starting points:
+ 
+- **`examples/253L/`** — T4 lysozyme L99A starting from a raw PDB. Demonstrates the full pipeline: `prepare clean` → `prepare solvate` → `run` with a multi-stage MD protocol (minimize → heat → equilibrate → production) and analysis (RMSD, H-bonds). Uses an OpenMM force field; no external programs necessary.
+- **`examples/Amber_FP/`** — fluorescent protein starting from a pre-built AMBER topology (`parm7` + `pdb`). Same MD protocol as 253L, but skips the preparation stage since the system is already parametrised.
+Each example has a `README.md` explaining the workflow, a `config.yaml`, and a `run.sh` that runs the full pipeline.
+ 
+---
+
 ## Specifying the system
  
 The `system` block supports a few input combinations:
