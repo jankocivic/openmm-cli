@@ -237,9 +237,3 @@ Conventions worth following:
 ## Acknowledgements
 
 Built on [OpenMM](https://openmm.org) for the simulation engine, [mdtraj](https://mdtraj.org) for trajectory analysis, [PDBFixer](https://github.com/openmm/pdbfixer) for system preparation, [Pydantic](https://pydantic.dev) for config validation, and [Typer](https://typer.tiangolo.com) for the CLI.
-
----
-
-## License
-
-MIT
