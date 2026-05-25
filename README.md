@@ -4,7 +4,7 @@ A command-line interface for running standard molecular dynamics simulations wit
 
 `openmm-cli` provides a simple interface for common simulation tasks such as minimization, heating, equilibration, and production runs, with sensible defaults and minimal configuration.
 
-> **Status: work in progress.** APIs and config schema may change. The tool currently supports AMBER topologies (`.parm7` / `.prmtop`) and OpenMM force field workflows (PDB topology + force field XMLs); other formats (GROMACS, CHARMM, OpenMM XML system files) are planned.
+> **Status: work in progress.** The tool currently supports AMBER topologies (`.parm7` / `.prmtop`) and OpenMM force field workflows (PDB topology + force field XMLs); other formats (GROMACS, CHARMM, ...) are planned.
 
 ---
 
@@ -35,7 +35,7 @@ pip install -e .
 
 Requires Python 3.10+ and a working OpenMM installation (CUDA recommended for production).
 
-> **Platform note:** `openmm-cli` has so far only been tested on Linux. It should work on macOS in principle, and on Windows via WSL, but neither has been verified.
+> **Platform note:** `openmm-cli` has so far only been tested on Linux via Windows WSL. It should work on macOS, but not verified.
 
 ---
 
@@ -237,6 +237,7 @@ Conventions worth following:
 ## Acknowledgements
 
 Built on [OpenMM](https://openmm.org) for the simulation engine, [mdtraj](https://mdtraj.org) for trajectory analysis, [PDBFixer](https://github.com/openmm/pdbfixer) for system preparation, [Pydantic](https://pydantic.dev) for config validation, and [Typer](https://typer.tiangolo.com) for the CLI.
+
 ---
 
 ## License
