@@ -1,11 +1,13 @@
 # Python cache
 __pycache__/
 scratch/
-examples/*
+examples/**
+!examples/253L/
 !examples/253L/253L.pdb
 !examples/253L/run.sh
 !examples/253L/config.yaml
 !examples/253L/README.md
+!examples/Amber_FP/
 !examples/Amber_FP/fp.parm7
 !examples/Amber_FP/fp.pdb
 !examples/Amber_FP/run.sh

@@ -1,0 +1,83 @@
+# Fluorescent protein simulation from a pre-built AMBER topology.
+#
+# Workflow: minimize -> heat (with heavy-atom restraints)
+#        -> equilibrate (with CA restraints) -> production -> analysis.
+
+system:
+  topology: fp.parm7
+  coordinates: fp.pdb
+
+system_settings:
+  nonbonded_method: PME
+  nonbonded_cutoff: 1.0 nm
+  constraints: HBonds
+  rigid_water: true
+
+platform:
+  name: CPU             # change to CUDA if a GPU is available
+  precision: mixed
+
+defaults:
+  integrator:
+    type: LangevinMiddle
+    timestep: 2 fs
+    temperature: 300 K
+    friction: 1.0 /ps
+  barostat:
+    type: MonteCarloBarostat
+    pressure: 1 atm
+    frequency: 25
+
+output_dir: output
+
+stages:
+  - name: minimize
+    type: minimization
+    max_iterations: 1000
+
+  - name: heat
+    type: dynamics
+    steps: 5000                       # 10 ps
+    start_temperature: 100 K
+    initialize_velocities: true
+    disable_barostat: true            # NVT
+    restraints:
+      - type: positional
+        selection: "protein and not element H"
+        force_constant: 1000 kJ/mol/nm^2
+
+  - name: equilibrate
+    type: dynamics
+    steps: 10000                      # 20 ps -- NPT with looser restraints
+    restraints:
+      - type: positional
+        selection: "protein and name CA"
+        force_constant: 100 kJ/mol/nm^2
+    reporters:
+      state: { file: equil.csv, interval: 500 }
+
+  - name: production
+    type: dynamics
+    steps: 25000                      # 50 ps
+    reporters:
+      trajectory: { file: prod.pdb, interval: 500 }   # save every 1 ps
+      state:      { file: prod.csv, interval: 250 }
+
+  - name: rmsd
+    type: analysis
+    command: rmsd
+    args:
+      trajectory: prod.pdb
+      top: ../fp.parm7
+      sel: "protein and name CA"
+      out: rmsd.csv
+
+  - name: hbonds
+    type: analysis
+    command: hbonds
+    args:
+      trajectory: prod.pdb
+      top: ../fp.parm7
+      sel: "protein"
+      freq: 0.5
+      out: hbonds.csv
