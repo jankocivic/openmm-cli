@@ -18,7 +18,7 @@ examples/**
 ./src/openmm_cli/commands/__pycache__
 
 # Virtual environment (.venv)
-./src/openmm_cli.egg-info
+./src/openmm_cli.egg-info/
 .venv/
 
 
