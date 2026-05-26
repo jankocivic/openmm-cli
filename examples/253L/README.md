@@ -39,7 +39,7 @@ openmm-cli run config.yaml
 
 ## Runtime
 
-The simulation is 80 ps total (~40 000 integration steps). On a modern CPU expect roughly within 1 hour; on a CUDA GPU it should finish in a couple of minutes. To run faster, set `platform.name: CUDA` in `config.yaml`.
+The simulation is 50 ps total (~25 000 integration steps). On a modern CPU expect roughly within 1 hour; on a CUDA GPU it should finish in a couple of minutes. To run faster, set `platform.name: CUDA` in `config.yaml`.
 
 ## Notes
 
