@@ -40,7 +40,9 @@ def command(
         if traj.unitcell_vectors is None:
             print("Warning: no periodic box; skipping imaging.")
         else:
-            traj.image_molecules(inplace=True)
+            anchor = traj.topology.select(selection)
+            anchor_atoms = [traj.topology.atom(int(i)) for i in anchor]
+            traj.image_molecules(inplace=True, anchor_molecules=[anchor_atoms])
 
     traj.save(str(output))
     print(f"Centered {traj.n_frames} frames on '{selection}' at {target}"

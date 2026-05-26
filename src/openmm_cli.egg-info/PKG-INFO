@@ -21,7 +21,7 @@ A command-line interface for running standard molecular dynamics simulations wit
 
 `openmm-cli` provides a simple interface for common simulation tasks such as minimization, heating, equilibration, and production runs, with sensible defaults and minimal configuration.
 
-> **Status: work in progress.** The tool currently supports AMBER topologies (`.parm7` / `.prmtop`) and OpenMM force field workflows (PDB topology + force field XMLs); other formats (GROMACS, CHARMM, ...) are planned.
+> **Status: project in very early stage.** The tool currently supports AMBER topologies (`.parm7` / `.prmtop`) and OpenMM force field workflows (PDB topology + force field XMLs); other formats (GROMACS, CHARMM, ...) are planned.
 
 ---
 
@@ -66,7 +66,9 @@ Requires Python 3.10+ and a working OpenMM installation (CUDA recommended for pr
 
 ## Quick Start
 
-Write a `config.yaml`:
+See `openmm-cli --help`, `openmm-cli trajectory --help` and `openmm-cli prepare --help` for the full command list.
+
+For running an MD simulation protocol write a `config.yaml`:
 
 ```yaml
 system:
@@ -121,8 +123,6 @@ openmm-cli trajectory rmsd     output/prod.dcd --top protein.parm7 --sel "name C
 openmm-cli trajectory distance output/prod.dcd --top protein.parm7 \
     --a "resname LIG" --b "resid 42 and name CA"
 ```
-
-See `openmm-cli --help` and `openmm-cli trajectory --help` for the full command list.
 
 ---
 
@@ -221,8 +221,8 @@ src/openmm_cli/commands/
 ├── prepare/              # `openmm-cli prepare ...`
 │   ├── __init__.py
 │   ├── clean.py
-    ├── solvate.py
-    └── ...
+│   ├── solvate.py
+│   └── ...
 └── trajectory/           # `openmm-cli trajectory ...`
     ├── __init__.py
     ├── rmsd.py
@@ -265,7 +265,7 @@ Conventions worth following:
 
 ## Related projects
 
-`openmm-cli` is inspired by [**OMMProtocol**](https://github.com/insilichem/ommprotocol) (Rodríguez-Guerra et al.), which also drives OpenMM through a YAML config organized into stages. Differences from OMMProtocol: `openmm-cli` is built on a modern Python stack (Pydantic for config validation, Typer for the CLI), integrates preparation and trajectory analysis as commands, and is structured so new commands can be added by dropping a single file into the right folder — see [Adding a command](#adding-a-command) below.
+`openmm-cli` is inspired by [**OMMProtocol**](https://github.com/insilichem/ommprotocol), which also drives OpenMM through a YAML config organized into stages. Differences from OMMProtocol: `openmm-cli` is built on a modern Python stack (Pydantic for config validation, Typer for the CLI), integrates preparation and trajectory analysis as commands, and is structured so new commands can be added by dropping a single file into the right folder — see [Adding a command](#adding-a-command).
 
 ---
 
