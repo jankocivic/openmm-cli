@@ -157,8 +157,6 @@ system:
   restart_from: previous_run/production.xml
 ```
  
-Set `initialize_velocities: false` on the first stage of a restart run, or the loaded velocities will be discarded.
- 
 ---
 
 ## Analysis stages
