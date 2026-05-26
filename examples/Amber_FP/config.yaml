@@ -15,7 +15,6 @@ system_settings:
 
 platform:
   name: CPU             # change to CUDA if a GPU is available
-  precision: mixed
 
 defaults:
   integrator:
