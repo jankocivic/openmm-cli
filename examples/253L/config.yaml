@@ -16,8 +16,7 @@ system_settings:
   rigid_water: true
 
 platform:
-  name: CPU             # change to CPU if GPU is not available
-  #precision: mixed
+  name: CPU             # change to CUDA if GPU is available
 
 defaults:
   integrator:
