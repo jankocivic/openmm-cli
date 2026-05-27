@@ -57,7 +57,7 @@ for path in csvs:
     
     # Find time- and step-like columns
     time_cols = [c for c in df.columns if "time" in c.lower()]
-    step_cols = [c for c in df.columns if c.lower() == "step"]
+    step_cols = [c for c in df.columns if c.lower() in ("step","frame")]
     
     # Neither time nor step → not a time series; show as a table (rmsf-like)
     if not time_cols and not step_cols:
@@ -77,7 +77,7 @@ for path in csvs:
         default=y_options,
         key=path.name,
     )
-    
+   
     for col in y_cols:
         fig = px.line(df, x=x, y=col, title=col)
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, width="stretch", key=f"{path.name}:{col}")

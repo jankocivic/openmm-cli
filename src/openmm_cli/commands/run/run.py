@@ -10,6 +10,7 @@ import mdtraj as md
 import openmm as mm
 import yaml
 from openmm import app, unit
+from mdtraj.reporters import DCDReporter as MDTrajDCDReporter, HDF5Reporter, NetCDFReporter
 
 from .config import (
     BarostatConfig,
@@ -155,12 +156,15 @@ def configure_barostat(simulation, system, cfg: Config, stage: DynamicsStage):
 # ---- Reporters -------------------------------------------------------------
 
 _TRAJECTORY_REPORTERS = {
-    "dcd": app.DCDReporter,
+    "dcd": MDTrajDCDReporter,
     "xtc": app.XTCReporter,
     "pdb": app.PDBReporter,
     "pdbx": app.PDBxReporter,
+    "hdf5": HDF5Reporter,
+    "h5": HDF5Reporter,
+    "netcdf": NetCDFReporter,
+    "nc": NetCDFReporter,
 }
-
 
 def _make_trajectory_reporter(cfg, output_dir: Path):
     """Build the right reporter for the requested trajectory format."""
@@ -276,6 +280,7 @@ def run_dynamics(simulation, system, topology, cfg, stage, prev_restraint_indice
     for r in build_reporters(stage.reporters, stage.steps, output_dir):
         simulation.reporters.append(r)
     simulation.currentStep = 0
+    simulation.context.setTime(0)
 
     if start_T is not None:
         # Heating ramp: 100 chunks, temperature stepped between each

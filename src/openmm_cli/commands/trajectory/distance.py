@@ -27,7 +27,7 @@ def command(
     distances = np.linalg.norm(pos_a - pos_b, axis=1)
 
     with open(output, "w") as f:
-        f.write("time_ps,distance_nm\n")
-        for t, d in zip(traj.time, distances):
-            f.write(f"{t},{d}\n")
+        f.write("frame,distance_nm\n")
+        for i, r in enumerate(distances):
+            f.write(f"{i},{r}\n")
     print(f"Wrote {output} ({traj.n_frames} frames)")

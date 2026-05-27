@@ -1,4 +1,4 @@
-"""Print a summary of a trajectory: frames, time range, atoms, box."""
+"""Print a summary of a trajectory: frames, atoms, box."""
 from pathlib import Path
 from typing import Annotated
 
@@ -10,20 +10,13 @@ def command(
     trajectory: Annotated[Path, typer.Argument()],
     topology: Annotated[Path, typer.Option("--top")],
 ) -> None:
-    """Print frames, time range, atoms, residues, chains, and box information."""
+    """Print frames, atoms, residues, chains, and box information."""
     traj = md.load(str(trajectory), top=str(topology))
     top = traj.topology
 
     print(f"Trajectory: {trajectory}")
     print(f"Topology:   {topology}")
     print(f"Frames:     {traj.n_frames}")
-
-    if traj.n_frames > 1:
-        dt = traj.time[1] - traj.time[0]
-        print(f"Time:       {traj.time[0]:.2f} to {traj.time[-1]:.2f} ps "
-              f"(stride {dt:.2f} ps)")
-    elif traj.n_frames == 1:
-        print(f"Time:       {traj.time[0]:.2f} ps")
 
     print(f"Atoms:      {traj.n_atoms}")
     print(f"Residues:   {top.n_residues}")
