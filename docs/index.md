@@ -1,8 +1,8 @@
 # openmm-cli
 
-A command-line interface for running standard molecular dynamics simulations with OpenMM.
-
-`openmm-cli` provides a simple interface for common simulation tasks such as minimization, heating, equilibration, and production runs, with sensible defaults and minimal configuration.
+A command-line interface for running molecular dynamics simulations with OpenMM, without writing Python.
+ 
+`openmm-cli` runs a full simulation workflow (minimization, heating, equilibration, production, and trajectory analysis) from one YAML file. Describe the simulation in the configuration file and the CLI does the rest. The field names are plain (`temperature: 300 K`, `nonbonded_method: PME`, `disable_barostat: true`), which is easier to read than the short keywords used in other MD packages. The YAML file also serves as a record for future reproducibility.
 
 > **Status: project in very early stage.** The tool currently supports AMBER topologies (`.parm7` / `.prmtop`) and OpenMM force field workflows (PDB topology + force field XMLs); other formats (GROMACS, CHARMM, ...) are planned.
 
@@ -15,7 +15,8 @@ A command-line interface for running standard molecular dynamics simulations wit
 - Restart from saved states
 - Trajectory analysis and processing commands (RMSD, RMSF, distances, dihedrals, H-bonds, imaging, centering, stripping, format conversion)
 - System preparation commands (PDB cleanup, solvation, ion placement)
-- Built on [OpenMM](https://openmm.org) and [mdtraj](https://mdtraj.org)
+- Optional web dashboard for browsing simulation outputs
+- Built on [OpenMM](https://openmm.org) and [MDTraj](https://mdtraj.org)
 
 ---
 
@@ -28,10 +29,10 @@ uv sync
 source .venv/bin/activate # Activate virtual environment, should be done every terminal session
 ```
 
-Or with pip inside a virtual environment created with for example conda:
+For the optional web dashboard:
 
 ```bash
-pip install -e .
+uv sync --extra dashboard
 ```
 
 Enable autocompletion of commands:
@@ -39,9 +40,6 @@ Enable autocompletion of commands:
 ```bash
 openmm-cli --install-completion # Applies only after restarting the terminal
 ```
-
-
-Requires Python 3.10+ and a working OpenMM installation (CUDA recommended for production).
 
 > **Platform note:** `openmm-cli` has so far only been tested on Linux via Windows WSL. It should work on macOS, but not verified.
 
@@ -117,6 +115,19 @@ The `examples/` directory contains complete, runnable workflows you can use as s
 - **`examples/Amber_FP/`** — fluorescent protein starting from a pre-built AMBER topology (`parm7` + `pdb`). Same MD protocol as 253L, but skips the preparation stage since the system is already parametrised.
 Each example has a `README.md` explaining the workflow, a `config.yaml`, and a `run.sh` that runs the full pipeline.
  
+---
+
+## Dashboard
+
+`openmm-cli` includes an optional Streamlit dashboard for browsing simulation outputs. After installing the extra, launch it pointing at any directory containing CSV files:
+
+```bash
+openmm-cli dashboard                  # current directory
+openmm-cli dashboard examples/253L/output
+```
+
+The dashboard reads every CSV in the directory and plots its numeric columns over time (energies, temperature, density, RMSD, etc.). Non-time-series files like H-bond inventories or RMSF results render as sortable tables.
+
 ---
 
 ## Specifying the system
