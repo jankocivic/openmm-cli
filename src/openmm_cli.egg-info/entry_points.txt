@@ -1,0 +1,2 @@
+[console_scripts]
+openmm-cli = openmm_cli.cli:app
