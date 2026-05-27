@@ -49,7 +49,7 @@ def command(
 
     unit = "deg" if degrees else "rad"
     with open(output, "w") as f:
-        f.write(f"time_ps,dihedral_{unit}\n")
-        for t, val in zip(traj.time, dihedrals):
-            f.write(f"{t},{val}\n")
+        f.write(f"frame,dihedral_{unit}\n")
+        for i, r in enumerate(dihedrals):
+            f.write(f"{i},{r}\n")
     print(f"Wrote {output} ({traj.n_frames} frames)")

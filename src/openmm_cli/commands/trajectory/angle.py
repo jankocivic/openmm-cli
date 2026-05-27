@@ -36,7 +36,7 @@ def command(
 
     unit = "deg" if degrees else "rad"
     with open(output, "w") as f:
-        f.write(f"time_ps,angle_{unit}\n")
-        for t, val in zip(traj.time, angles):
-            f.write(f"{t},{val}\n")
+        f.write(f"frame,angle_{unit}\n")
+        for i, r in enumerate(angles):
+            f.write(f"{i},{r}\n")
     print(f"Wrote {output} ({traj.n_frames} frames)")

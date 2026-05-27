@@ -26,7 +26,7 @@ def command(
     rmsd = md.rmsd(traj, ref, atom_indices=atom_indices)
 
     with open(output, "w") as f:
-        f.write("time_ps,rmsd_nm\n")
-        for t, r in zip(traj.time, rmsd):
-            f.write(f"{t},{r}\n")
-    print(f"Wrote {output} ({traj.n_frames} frames, {len(atom_indices)} atoms)")
+        f.write("frame,rmsd_nm\n")
+        for i, r in enumerate(rmsd):
+            f.write(f"{i},{r}\n")
+    print(f"Wrote {output} ({traj.n_frames} frames)")
