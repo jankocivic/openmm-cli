@@ -16,6 +16,8 @@ dependencies = [
 ]
 [project.scripts]
 openmm-cli = "openmm_cli.cli:app"
+[project.urls]
+Documentation = "https://jankocivic.github.io/openmm-cli/"
 
 [tool.uv]
 package = true
