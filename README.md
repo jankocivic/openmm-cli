@@ -1,4 +1,5 @@
 # openmm-cli
+[![docs](https://img.shields.io/badge/docs-online-blue)](https://<user>.github.io/openmm-cli/)
 
 A command-line interface for running standard molecular dynamics simulations with OpenMM.
 
