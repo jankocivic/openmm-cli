@@ -22,8 +22,6 @@ A command-line interface for running molecular dynamics simulations with OpenMM,
 
 ## Installation
 
-## Installation
-
 [`uv`](https://docs.astral.sh/uv/) is the recommended way to install `openmm-cli` (uv can be installed with `curl -LsSf https://astral.sh/uv/install.sh | sh` on Linux or macOS).
 
 Then run:
