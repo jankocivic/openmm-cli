@@ -23,6 +23,10 @@ A command-line interface for running molecular dynamics simulations with OpenMM,
 
 ## Installation
 
+[`uv`](https://docs.astral.sh/uv/) is the recommended way to install `openmm-cli` (uv can be installed with `curl -LsSf https://astral.sh/uv/install.sh | sh` on Linux or macOS).
+
+Then run:
+
 ```bash
 git clone https://github.com/jankocivic/openmm-cli.git
 cd openmm-cli
@@ -42,7 +46,7 @@ Enable autocompletion of commands:
 openmm-cli --install-completion # Applies only after restarting the terminal
 ```
 
-> **Platform note:** `openmm-cli` has so far only been tested on Linux via Windows WSL. It should work on macOS, but not verified.
+> **Note:** `openmm-cli` has so far only been tested on Linux via Windows WSL. It should work on macOS, but not verified. In principle, cloning and installing via `pip install -e .` should also work, but not verified.
 
 ---
 
