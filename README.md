@@ -1,9 +1,9 @@
 # openmm-cli
 [![docs](https://img.shields.io/badge/docs-online-blue)](https://jankocivic.github.io/openmm-cli/)
 
-A command-line interface for running standard molecular dynamics simulations with OpenMM.
-
-`openmm-cli` provides a simple interface for common simulation tasks such as minimization, heating, equilibration, and production runs, with sensible defaults and minimal configuration.
+A command-line interface for running molecular dynamics simulations with OpenMM, without writing Python.
+ 
+`openmm-cli` runs a full simulation workflow (minimization, heating, equilibration, production, and trajectory analysis) from one YAML file. Describe the simulation in the configuration file and the CLI does the rest. The field names are plain (`temperature: 300 K`, `nonbonded_method: PME`, `disable_barostat: true`), which is easier to read than the short keywords used in other MD packages. The YAML file also serves as a record for future reproducibility.
 
 > **Status: project in very early stage.** The tool currently supports AMBER topologies (`.parm7` / `.prmtop`) and OpenMM force field workflows (PDB topology + force field XMLs); other formats (GROMACS, CHARMM, ...) are planned.
 
@@ -17,7 +17,7 @@ A command-line interface for running standard molecular dynamics simulations wit
 - Trajectory analysis and processing commands (RMSD, RMSF, distances, dihedrals, H-bonds, imaging, centering, stripping, format conversion)
 - System preparation commands (PDB cleanup, solvation, ion placement)
 - Optional web dashboard for browsing simulation outputs
-- Built on [OpenMM](https://openmm.org) and [mdtraj](https://mdtraj.org)
+- Built on [OpenMM](https://openmm.org) and [MDTraj](https://mdtraj.org)
 
 ---
 

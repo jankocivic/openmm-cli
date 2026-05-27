@@ -77,7 +77,7 @@ stages:
     type: analysis
     command: hbonds
     args:
-      trajectory: prod.dcd
+      trajectory: prod.pdb
       top: ../solvated.pdb
       sel: "protein"
       freq: 0.5
