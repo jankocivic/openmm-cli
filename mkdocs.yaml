@@ -1,0 +1,17 @@
+site_name: openmm-cli
+repo_url: https://github.com/jankocivic/openmm-cli
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - content.code.copy
+
+plugins:
+  - search
+  - mkdocs-typer2
+
+nav:
+  - Home: index.md
+  - Reference:
+    - CLI: reference/cli.md
