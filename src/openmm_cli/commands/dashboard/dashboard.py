@@ -25,7 +25,7 @@ def command(
         )
         raise typer.Exit(1)
 
-    app_path = files("openmm_cli.dashboard").joinpath("app.py")
+    app_path = files(__package__).joinpath("app.py")
     subprocess.run(
         [
             sys.executable, "-m", "streamlit", "run", str(app_path),
