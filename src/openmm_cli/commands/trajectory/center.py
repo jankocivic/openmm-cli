@@ -1,4 +1,5 @@
 """Translate frames so a selection sits at the box center (or origin), optionally imaging molecules."""
+
 from pathlib import Path
 from typing import Annotated, Literal
 
@@ -10,12 +11,21 @@ def command(
     trajectory: Annotated[Path, typer.Argument()],
     topology: Annotated[Path, typer.Option("--top")],
     output: Annotated[Path, typer.Option("--out")] = Path("centered.dcd"),
-    selection: Annotated[str, typer.Option("--sel",
-        help="Selection whose center of mass should be moved.")] = "protein",
-    target: Annotated[Literal["box", "origin"], typer.Option("--target",
-        help="Where to place the COM.")] = "box",
-    image: Annotated[bool, typer.Option("--image/--no-image",
-        help="Image molecules into the unit cell after centering.")] = True,
+    selection: Annotated[
+        str,
+        typer.Option("--sel", help="Selection whose center of mass should be moved."),
+    ] = "protein",
+    target: Annotated[
+        Literal["box", "origin"],
+        typer.Option("--target", help="Where to place the COM."),
+    ] = "box",
+    image: Annotated[
+        bool,
+        typer.Option(
+            "--image/--no-image",
+            help="Image molecules into the unit cell after centering.",
+        ),
+    ] = True,
 ) -> None:
     """Translate each frame so the selection's COM sits at the target, then by default image molecules."""
     traj = md.load(str(trajectory), top=str(topology))
@@ -45,5 +55,7 @@ def command(
             traj.image_molecules(inplace=True, anchor_molecules=[anchor_atoms])
 
     traj.save(str(output))
-    print(f"Centered {traj.n_frames} frames on '{selection}' at {target}"
-          f"{' + imaged' if image and traj.unitcell_vectors is not None else ''}; wrote {output}")
+    print(
+        f"Centered {traj.n_frames} frames on '{selection}' at {target}"
+        f"{' + imaged' if image and traj.unitcell_vectors is not None else ''}; wrote {output}"
+    )

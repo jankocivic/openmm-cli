@@ -1,4 +1,5 @@
 """Compute the angle between three atom selections (by center of mass) over time."""
+
 from pathlib import Path
 from typing import Annotated
 
@@ -11,7 +12,9 @@ def command(
     trajectory: Annotated[Path, typer.Argument()],
     topology: Annotated[Path, typer.Option("--top")],
     selection_a: Annotated[str, typer.Option("--a", help="First selection.")],
-    selection_b: Annotated[str, typer.Option("--b", help="Second selection (the vertex).")],
+    selection_b: Annotated[
+        str, typer.Option("--b", help="Second selection (the vertex).")
+    ],
     selection_c: Annotated[str, typer.Option("--c", help="Third selection.")],
     output: Annotated[Path, typer.Option("--out")] = Path("angle.csv"),
     degrees: Annotated[bool, typer.Option("--degrees/--radians")] = True,
@@ -29,7 +32,9 @@ def command(
 
     v1 = a - b
     v2 = c - b
-    cos_angle = (v1 * v2).sum(axis=1) / (np.linalg.norm(v1, axis=1) * np.linalg.norm(v2, axis=1))
+    cos_angle = (v1 * v2).sum(axis=1) / (
+        np.linalg.norm(v1, axis=1) * np.linalg.norm(v2, axis=1)
+    )
     angles = np.arccos(np.clip(cos_angle, -1.0, 1.0))
     if degrees:
         angles = np.degrees(angles)

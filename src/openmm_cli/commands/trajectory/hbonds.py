@@ -1,6 +1,7 @@
 """Identify hydrogen bonds present in a trajectory (Baker-Hubbard criterion)."""
+
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import mdtraj as md
 import numpy as np
@@ -11,10 +12,19 @@ def command(
     trajectory: Annotated[Path, typer.Argument()],
     topology: Annotated[Path, typer.Option("--top")],
     output: Annotated[Path, typer.Option("--out")] = Path("hbonds.csv"),
-    freq: Annotated[float, typer.Option(
-        help="Minimum fraction of frames an H-bond must be present (0-1).")] = 0.1,
-    selection: Annotated[Optional[str], typer.Option("--sel",
-        help="Restrict to H-bonds where both donor and acceptor are in this selection.")] = None,
+    freq: Annotated[
+        float,
+        typer.Option(
+            help="Minimum fraction of frames an H-bond must be present (0-1)."
+        ),
+    ] = 0.1,
+    selection: Annotated[
+        str | None,
+        typer.Option(
+            "--sel",
+            help="Restrict to H-bonds where both donor and acceptor are in this selection.",
+        ),
+    ] = None,
 ) -> None:
     """List hydrogen bonds present in at least `freq` of frames, with their per-bond occupancy."""
     traj = md.load(str(trajectory), top=str(topology))
@@ -46,9 +56,13 @@ def command(
         f.write("donor,hydrogen,acceptor,frequency\n")
         for i in order:
             d, h, a = hbonds[i]
-            f.write(f"{traj.topology.atom(int(d))},"
-                    f"{traj.topology.atom(int(h))},"
-                    f"{traj.topology.atom(int(a))},"
-                    f"{frequencies[i]:.4f}\n")
+            f.write(
+                f"{traj.topology.atom(int(d))},"
+                f"{traj.topology.atom(int(h))},"
+                f"{traj.topology.atom(int(a))},"
+                f"{frequencies[i]:.4f}\n"
+            )
 
-    print(f"Found {len(hbonds)} hydrogen bonds (>= {freq*100:.0f}% occupancy); wrote {output}")
+    print(
+        f"Found {len(hbonds)} hydrogen bonds (>= {freq * 100:.0f}% occupancy); wrote {output}"
+    )

@@ -1,4 +1,5 @@
 """Compute the distance between two atom selections over time."""
+
 from pathlib import Path
 from typing import Annotated
 

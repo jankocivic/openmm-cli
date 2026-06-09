@@ -1,29 +1,31 @@
 """Run an MD simulation from a YAML config."""
+
 from __future__ import annotations
 
 import sys
-from typing import Annotated
 from pathlib import Path
-import typer
+from typing import Annotated
 
 import mdtraj as md
 import openmm as mm
+import typer
 import yaml
+from mdtraj.reporters import DCDReporter as MDTrajDCDReporter
+from mdtraj.reporters import HDF5Reporter, NetCDFReporter
 from openmm import app, unit
-from mdtraj.reporters import DCDReporter as MDTrajDCDReporter, HDF5Reporter, NetCDFReporter
 
 from .config import (
+    AnalysisStage,
     BarostatConfig,
     Config,
     DynamicsStage,
-    AnalysisStage,
     IntegratorConfig,
     MinimizationStage,
     PositionalRestraint,
 )
 
-
 # ---- Construction helpers --------------------------------------------------
+
 
 def build_system(cfg: Config):
     """Returns (topology, positions, box_vectors, system)."""
@@ -52,7 +54,10 @@ def build_system(cfg: Config):
             else:
                 coords = app.AmberInpcrdFile(str(cfg.system.coordinates))
             positions = coords.positions
-            box = getattr(coords, "boxVectors", None) or coords.topology.getPeriodicBoxVectors()
+            box = (
+                getattr(coords, "boxVectors", None)
+                or coords.topology.getPeriodicBoxVectors()
+            )
         else:
             positions, box = None, None  # restart will provide them
         return prmtop.topology, positions, box, system
@@ -85,6 +90,7 @@ def build_platform(cfg: Config):
 
 
 # ---- Restraints ------------------------------------------------------------
+
 
 def _select_atoms(omm_topology, selection: str):
     mdt_top = md.Topology.from_openmm(omm_topology)
@@ -126,6 +132,7 @@ def apply_restraints(simulation, system, omm_topology, restraints, prev_indices)
 
 # ---- Barostat handling -----------------------------------------------------
 
+
 def _find_barostat(system):
     for i, f in enumerate(system.getForces()):
         if isinstance(f, mm.MonteCarloBarostat):
@@ -146,8 +153,11 @@ def configure_barostat(simulation, system, cfg: Config, stage: DynamicsStage):
     elif stage_b is not None:
         barostat.setFrequency(stage_b.frequency)
         barostat.setDefaultPressure(stage_b.pressure)
-        T = (stage.integrator.temperature if stage.integrator
-             else cfg.defaults.integrator.temperature)
+        T = (
+            stage.integrator.temperature
+            if stage.integrator
+            else cfg.defaults.integrator.temperature
+        )
         barostat.setDefaultTemperature(T)
 
     simulation.context.reinitialize(preserveState=True)
@@ -166,6 +176,7 @@ _TRAJECTORY_REPORTERS = {
     "nc": NetCDFReporter,
 }
 
+
 def _make_trajectory_reporter(cfg, output_dir: Path):
     """Build the right reporter for the requested trajectory format."""
     path = output_dir / cfg.file
@@ -175,9 +186,11 @@ def _make_trajectory_reporter(cfg, output_dir: Path):
         return _TRAJECTORY_REPORTERS[fmt](str(path), cfg.interval)
     if fmt in ("h5", "hdf5"):
         from mdtraj.reporters import HDF5Reporter
+
         return HDF5Reporter(str(path), cfg.interval)
     if fmt in ("nc", "netcdf"):
         from mdtraj.reporters import NetCDFReporter
+
         return NetCDFReporter(str(path), cfg.interval)
     raise ValueError(
         f"Unknown trajectory format {fmt!r} for file {cfg.file}. "
@@ -191,28 +204,47 @@ def build_reporters(reporters_cfg, stage_steps: int, output_dir: Path):
         out.append(_make_trajectory_reporter(reporters_cfg.trajectory, output_dir))
     if reporters_cfg.state:
         path = output_dir / reporters_cfg.state.file
-        out.append(app.StateDataReporter(
-            str(path), reporters_cfg.state.interval,
-            step=True, time=True,
-            potentialEnergy=True, kineticEnergy=True, totalEnergy=True,
-            temperature=True, volume=True, density=True, speed=True,
-        ))
+        out.append(
+            app.StateDataReporter(
+                str(path),
+                reporters_cfg.state.interval,
+                step=True,
+                time=True,
+                potentialEnergy=True,
+                kineticEnergy=True,
+                totalEnergy=True,
+                temperature=True,
+                volume=True,
+                density=True,
+                speed=True,
+            )
+        )
     if reporters_cfg.checkpoint:
         path = output_dir / reporters_cfg.checkpoint.file
         out.append(app.CheckpointReporter(str(path), reporters_cfg.checkpoint.interval))
-    out.append(app.StateDataReporter(
-        sys.stdout, max(1, stage_steps // 20),
-        step=True, progress=True, totalSteps=stage_steps,
-        temperature=True, speed=True, remainingTime=True,
-    ))
+    out.append(
+        app.StateDataReporter(
+            sys.stdout,
+            max(1, stage_steps // 20),
+            step=True,
+            progress=True,
+            totalSteps=stage_steps,
+            temperature=True,
+            speed=True,
+            remainingTime=True,
+        )
+    )
     return out
 
 
 # ---- State I/O -------------------------------------------------------------
 
+
 def save_state(simulation, path: Path):
     state = simulation.context.getState(
-        getPositions=True, getVelocities=True, getEnergy=True,
+        getPositions=True,
+        getVelocities=True,
+        getEnergy=True,
         enforcePeriodicBox=True,
     )
     with open(path, "w") as f:
@@ -220,6 +252,7 @@ def save_state(simulation, path: Path):
 
 
 # ---- Analysis helper -------------------------------------------------------
+
 
 def _cli_args_to_kwargs(func, args: dict) -> dict:
     """Translate YAML keys (matching --flag names) to Python parameter names."""
@@ -246,7 +279,10 @@ def _cli_args_to_kwargs(func, args: dict) -> dict:
 
 # ---- Stage drivers ---------------------------------------------------------
 
-def run_minimization(simulation, system, topology, stage, prev_restraint_indices, output_dir):
+
+def run_minimization(
+    simulation, system, topology, stage, prev_restraint_indices, output_dir
+):
     new_restraint_indices = apply_restraints(
         simulation, system, topology, stage.restraints, prev_restraint_indices
     )
@@ -259,9 +295,14 @@ def run_minimization(simulation, system, topology, stage, prev_restraint_indices
     return new_restraint_indices
 
 
-def run_dynamics(simulation, system, topology, cfg, stage, prev_restraint_indices, output_dir):
-    end_T = (stage.integrator.temperature if stage.integrator
-             else cfg.defaults.integrator.temperature)
+def run_dynamics(
+    simulation, system, topology, cfg, stage, prev_restraint_indices, output_dir
+):
+    end_T = (
+        stage.integrator.temperature
+        if stage.integrator
+        else cfg.defaults.integrator.temperature
+    )
     start_T = stage.start_temperature  # None if not heating
     initial_T = start_T if start_T is not None else end_T
 
@@ -303,7 +344,9 @@ def run_dynamics(simulation, system, topology, cfg, stage, prev_restraint_indice
 
 
 def run_analysis(stage: AnalysisStage, output_dir: Path):
-    import importlib, os
+    import importlib
+    import os
+
     module = importlib.import_module(f"openmm_cli.commands.trajectory.{stage.command}")
     kwargs = _cli_args_to_kwargs(module.command, stage.args)
     cwd = os.getcwd()
@@ -316,7 +359,12 @@ def run_analysis(stage: AnalysisStage, output_dir: Path):
 
 # ---- Typer command ---------------------------------------------------------
 
-def command(config: Annotated[Path, typer.Argument(..., help="Path to yaml configuration file.")]) -> None:
+
+def command(
+    config: Annotated[
+        Path, typer.Argument(..., help="Path to yaml configuration file.")
+    ],
+) -> None:
     """Run an MD simulation from a YAML config file."""
     with open(config) as f:
         raw = yaml.safe_load(f)
@@ -333,14 +381,20 @@ def command(config: Annotated[Path, typer.Argument(..., help="Path to yaml confi
         print(f"Loading coordinates from {cfg.system.topology}")
 
     topology, positions, box_vectors, system = build_system(cfg)
-    print(f"System: {system.getNumParticles()} particles, "
-          f"{system.getNumConstraints()} constraints")
+    print(
+        f"System: {system.getNumParticles()} particles, "
+        f"{system.getNumConstraints()} constraints"
+    )
 
     if cfg.defaults.barostat is not None:
         b = cfg.defaults.barostat
-        system.addForce(mm.MonteCarloBarostat(
-            b.pressure, cfg.defaults.integrator.temperature, b.frequency,
-        ))
+        system.addForce(
+            mm.MonteCarloBarostat(
+                b.pressure,
+                cfg.defaults.integrator.temperature,
+                b.frequency,
+            )
+        )
 
     integrator = build_integrator(cfg.defaults.integrator)
     platform, plat_props = build_platform(cfg)
@@ -355,20 +409,32 @@ def command(config: Annotated[Path, typer.Argument(..., help="Path to yaml confi
             state = mm.XmlSerializer.deserialize(f.read())
         simulation.context.setState(state)
 
-    print(f"Platform: {simulation.context.getPlatform().getName()} "
-          f"({cfg.platform.precision} precision)")
+    print(
+        f"Platform: {simulation.context.getPlatform().getName()} "
+        f"({cfg.platform.precision} precision)"
+    )
 
     restraint_indices: list[int] = []
     for stage in cfg.stages:
         print(f"\n=== Stage: {stage.name} ({stage.type}) ===")
         if isinstance(stage, MinimizationStage):
             restraint_indices = run_minimization(
-                simulation, system, topology, stage, restraint_indices, output_dir,
+                simulation,
+                system,
+                topology,
+                stage,
+                restraint_indices,
+                output_dir,
             )
         elif isinstance(stage, DynamicsStage):
             restraint_indices = run_dynamics(
-                simulation, system, topology, cfg, stage,
-                restraint_indices, output_dir,
+                simulation,
+                system,
+                topology,
+                cfg,
+                stage,
+                restraint_indices,
+                output_dir,
             )
         elif isinstance(stage, AnalysisStage):
             run_analysis(stage, output_dir)

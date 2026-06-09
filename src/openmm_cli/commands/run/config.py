@@ -1,39 +1,46 @@
 """
 Configuration models for the MD runner.
 """
+
 from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Annotated, Literal, Optional, Union
+from typing import Annotated, Literal
 
 from openmm import unit
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
-
 
 # ---- Unit parsing -----------------------------------------------------------
 
 _UNIT_TOKENS = {
     # time
-    "fs": unit.femtoseconds, "ps": unit.picoseconds, "ns": unit.nanoseconds,
+    "fs": unit.femtoseconds,
+    "ps": unit.picoseconds,
+    "ns": unit.nanoseconds,
     # length
-    "nm": unit.nanometers, "A": unit.angstrom, "angstrom": unit.angstrom,
+    "nm": unit.nanometers,
+    "A": unit.angstrom,
+    "angstrom": unit.angstrom,
     # mass
-    "amu": unit.amu, "dalton": unit.dalton,
+    "amu": unit.amu,
+    "dalton": unit.dalton,
     # temperature
-    "K": unit.kelvin, "kelvin": unit.kelvin,
+    "K": unit.kelvin,
+    "kelvin": unit.kelvin,
     # pressure
-    "atm": unit.atmospheres, "bar": unit.bar,
+    "atm": unit.atmospheres,
+    "bar": unit.bar,
     # inverse time (e.g. Langevin friction)
-    "/ps": unit.picoseconds ** -1,
+    "/ps": unit.picoseconds**-1,
     # energy
     "kJ/mol": unit.kilojoules_per_mole,
     "kcal/mol": unit.kilocalories_per_mole,
     # force / force constants
     "kJ/mol/nm": unit.kilojoules_per_mole / unit.nanometer,
-    "kJ/mol/nm^2": unit.kilojoules_per_mole / unit.nanometer ** 2,
-    "kJ/mol/nm**2": unit.kilojoules_per_mole / unit.nanometer ** 2,
-    "kcal/mol/A^2": unit.kilocalories_per_mole / unit.angstrom ** 2,
+    "kJ/mol/nm^2": unit.kilojoules_per_mole / unit.nanometer**2,
+    "kJ/mol/nm**2": unit.kilojoules_per_mole / unit.nanometer**2,
+    "kcal/mol/A^2": unit.kilocalories_per_mole / unit.angstrom**2,
 }
 
 _QUANTITY_RE = re.compile(r"^([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\s+(.+)$")
@@ -71,6 +78,7 @@ def _q(v):
 
 # ---- System ----------------------------------------------------------------
 
+
 class SystemSources(BaseModel):
     """What we're simulating.
 
@@ -78,17 +86,22 @@ class SystemSources(BaseModel):
       - AMBER topology (.parm7/.prmtop) + coordinates (.inpcrd or .pdb), or restart_from
       - OpenMM PDB topology (.pdb) + forcefield XML list
     """
+
     topology: Path
-    coordinates: Optional[Path] = None
-    restart_from: Optional[Path] = None
-    forcefield: Optional[list[str]] = None   # e.g. ["amber14-all.xml", "amber14/tip3pfb.xml"]
+    coordinates: Path | None = None
+    restart_from: Path | None = None
+    forcefield: list[str] | None = (
+        None  # e.g. ["amber14-all.xml", "amber14/tip3pfb.xml"]
+    )
 
     @model_validator(mode="after")
     def _validate_inputs(self):
         suffix = self.topology.suffix.lower()
         if suffix in (".parm7", ".prmtop"):
             if self.coordinates is None and self.restart_from is None:
-                raise ValueError("AMBER topology requires `coordinates` or `restart_from`")
+                raise ValueError(
+                    "AMBER topology requires `coordinates` or `restart_from`"
+                )
         elif suffix == ".pdb":
             if self.forcefield is None:
                 raise ValueError("PDB topology requires a `forcefield` list")
@@ -99,28 +112,31 @@ class SystemSources(BaseModel):
 
 class SystemSettings(BaseModel):
     """How forces are computed -- args to prmtop.createSystem()."""
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     nonbonded_method: Literal[
         "NoCutoff", "CutoffNonPeriodic", "CutoffPeriodic", "Ewald", "PME"
     ] = "PME"
     nonbonded_cutoff: unit.Quantity = "1.0 nm"
-    constraints: Optional[Literal["HBonds", "AllBonds", "HAngles"]] = "HBonds"
+    constraints: Literal["HBonds", "AllBonds", "HAngles"] | None = "HBonds"
     rigid_water: bool = True
-    hydrogen_mass: Optional[unit.Quantity] = None
+    hydrogen_mass: unit.Quantity | None = None
 
     _v = field_validator("nonbonded_cutoff", "hydrogen_mass", mode="before")(_q)
 
 
 # ---- Platform --------------------------------------------------------------
 
+
 class PlatformConfig(BaseModel):
     name: Literal["CUDA", "OpenCL", "CPU", "Reference"] = "CPU"
     precision: Literal["single", "mixed", "double"] = "mixed"
-    device_index: Optional[str] = None  # e.g. "0" or "0,1"
+    device_index: str | None = None  # e.g. "0" or "0,1"
 
 
 # ---- Integrator / barostat -------------------------------------------------
+
 
 class IntegratorConfig(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True, validate_default=True)
@@ -145,11 +161,13 @@ class BarostatConfig(BaseModel):
 
 class Defaults(BaseModel):
     """Settings applied to every dynamics stage unless overridden."""
+
     integrator: IntegratorConfig = IntegratorConfig()
-    barostat: Optional[BarostatConfig] = None
+    barostat: BarostatConfig | None = None
 
 
 # ---- Restraints ------------------------------------------------------------
+
 
 class PositionalRestraint(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True, validate_default=True)
@@ -163,10 +181,13 @@ class PositionalRestraint(BaseModel):
 
 # ---- Reporters -------------------------------------------------------------
 
+
 class TrajectoryReporter(BaseModel):
     file: Path
     interval: int
-    format: Optional[Literal["dcd", "xtc", "pdb", "pdbx", "hdf5", "h5", "netcdf", "nc"]] = None
+    format: (
+        Literal["dcd", "xtc", "pdb", "pdbx", "hdf5", "h5", "netcdf", "nc"] | None
+    ) = None
     # If None, format is inferred from the file extension.
 
 
@@ -176,12 +197,13 @@ class ReporterFile(BaseModel):
 
 
 class Reporters(BaseModel):
-    trajectory: Optional[TrajectoryReporter] = None   # DCD/XTC/PDB/HDF5/NetCDF
-    state: Optional[ReporterFile] = None              # CSV state data
-    checkpoint: Optional[ReporterFile] = None         # binary checkpoint
+    trajectory: TrajectoryReporter | None = None  # DCD/XTC/PDB/HDF5/NetCDF
+    state: ReporterFile | None = None  # CSV state data
+    checkpoint: ReporterFile | None = None  # binary checkpoint
 
 
 # ---- Stages ----------------------------------------------------------------
+
 
 class MinimizationStage(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True, validate_default=True)
@@ -201,11 +223,11 @@ class DynamicsStage(BaseModel):
     name: str
     type: Literal["dynamics"]
     steps: int
-    start_temperature: Optional[unit.Quantity] = None
+    start_temperature: unit.Quantity | None = None
 
     # Per-stage overrides. None means "use default".
-    integrator: Optional[IntegratorConfig] = None
-    barostat: Optional[BarostatConfig] = None
+    integrator: IntegratorConfig | None = None
+    barostat: BarostatConfig | None = None
 
     # Explicitly turn off the barostat for this stage (e.g. NVT after NPT default).
     disable_barostat: bool = False
@@ -223,17 +245,18 @@ class DynamicsStage(BaseModel):
 class AnalysisStage(BaseModel):
     name: str
     type: Literal["analysis"]
-    command: str           # which trajectory command, e.g. "rmsd"
-    args: dict = {}        # YAML keys match the command's CLI flags
+    command: str  # which trajectory command, e.g. "rmsd"
+    args: dict = {}  # YAML keys match the command's CLI flags
 
 
 Stage = Annotated[
-    Union[MinimizationStage, DynamicsStage, AnalysisStage],
+    MinimizationStage | DynamicsStage | AnalysisStage,
     Field(discriminator="type"),
 ]
 
 
 # ---- Root ------------------------------------------------------------------
+
 
 class Config(BaseModel):
     system: SystemSources

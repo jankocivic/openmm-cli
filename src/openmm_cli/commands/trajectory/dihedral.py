@@ -1,4 +1,5 @@
 """Compute the dihedral angle between four atom selections (by center of mass) over time."""
+
 from pathlib import Path
 from typing import Annotated
 

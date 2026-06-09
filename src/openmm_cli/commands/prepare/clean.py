@@ -1,4 +1,5 @@
 """Clean a PDB file: fix missing atoms, add hydrogens, optionally strip waters/heteroatoms."""
+
 from pathlib import Path
 from typing import Annotated
 
@@ -9,17 +10,40 @@ from pdbfixer import PDBFixer
 
 def command(
     pdb: Annotated[Path, typer.Argument(help="Input PDB file.")],
-    output: Annotated[Path, typer.Option("--out", help="Output PDB file.")] = Path("cleaned.pdb"),
-    ph: Annotated[float, typer.Option("--ph",
-        help="pH used to assign protonation states.")] = 7.4,
-    keep_water: Annotated[bool, typer.Option("--keep-water/--strip-water",
-        help="Keep crystallographic water molecules (only applies when stripping heteroatoms).")] = False,
-    keep_heterogens: Annotated[bool, typer.Option("--keep-hetero/--strip-hetero",
-        help="Keep ligands, cofactors, and ions. Off by default for protein-only output.")] = False,
-    add_missing_residues: Annotated[bool, typer.Option("--add-residues/--no-add-residues",
-        help="Build in missing residues (gaps/loops). Off by default to avoid silent insertions.")] = False,
-    replace_nonstandard: Annotated[bool, typer.Option("--replace-nonstandard/--keep-nonstandard",
-        help="Replace nonstandard residues (e.g. MSE -> MET) with their standard equivalents.")] = True,
+    output: Annotated[Path, typer.Option("--out", help="Output PDB file.")] = Path(
+        "cleaned.pdb"
+    ),
+    ph: Annotated[
+        float, typer.Option("--ph", help="pH used to assign protonation states.")
+    ] = 7.4,
+    keep_water: Annotated[
+        bool,
+        typer.Option(
+            "--keep-water/--strip-water",
+            help="Keep crystallographic water molecules (only applies when stripping heteroatoms).",
+        ),
+    ] = False,
+    keep_heterogens: Annotated[
+        bool,
+        typer.Option(
+            "--keep-hetero/--strip-hetero",
+            help="Keep ligands, cofactors, and ions. Off by default for protein-only output.",
+        ),
+    ] = False,
+    add_missing_residues: Annotated[
+        bool,
+        typer.Option(
+            "--add-residues/--no-add-residues",
+            help="Build in missing residues (gaps/loops). Off by default to avoid silent insertions.",
+        ),
+    ] = False,
+    replace_nonstandard: Annotated[
+        bool,
+        typer.Option(
+            "--replace-nonstandard/--keep-nonstandard",
+            help="Replace nonstandard residues (e.g. MSE -> MET) with their standard equivalents.",
+        ),
+    ] = True,
 ) -> None:
     """Clean a PDB file with pdbfixer: fix structure, add hydrogens, optionally strip extras."""
     print(f"Loading {pdb}")
