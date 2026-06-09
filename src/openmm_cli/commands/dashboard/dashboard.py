@@ -1,4 +1,5 @@
 """Launch the openmm-cli dashboard."""
+
 import subprocess
 import sys
 from importlib.resources import files
@@ -9,9 +10,12 @@ import typer
 
 
 def command(
-    directory: Annotated[Path, typer.Argument(
-        help="Directory to display. Defaults to the current directory.",
-    )] = Path("."),
+    directory: Annotated[
+        Path,
+        typer.Argument(
+            help="Directory to display. Defaults to the current directory.",
+        ),
+    ] = Path("."),
     port: Annotated[int, typer.Option("--port", help="Port to serve on.")] = 8501,
 ) -> None:
     """Launch a web dashboard that plots CSV output files"""
@@ -28,10 +32,16 @@ def command(
     app_path = files(__package__).joinpath("app.py")
     subprocess.run(
         [
-            sys.executable, "-m", "streamlit", "run", str(app_path),
-            "--server.port", str(port),
-            "--",                                     # separates streamlit args from script args
-            "--directory", str(directory.resolve()),
+            sys.executable,
+            "-m",
+            "streamlit",
+            "run",
+            str(app_path),
+            "--server.port",
+            str(port),
+            "--",  # separates streamlit args from script args
+            "--directory",
+            str(directory.resolve()),
         ],
         check=True,
     )

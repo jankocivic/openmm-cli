@@ -1,4 +1,5 @@
 """Print a summary of a trajectory: frames, atoms, box."""
+
 from pathlib import Path
 from typing import Annotated
 

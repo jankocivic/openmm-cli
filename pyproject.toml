@@ -25,12 +25,8 @@ openmm-cli = "openmm_cli.cli:app"
 [project.urls]
 Documentation = "https://jankocivic.github.io/openmm-cli/"
 
-[tool.uv]
-package = true
-
 [dependency-groups]
 dev = [
-    "black>=26.3.0",
     "pytest>=9.0.2",
     "ruff>=0.15.5",
 ]
@@ -41,6 +37,13 @@ docs = [
     "mkdocstrings[python]>=1.0.4",
 ]
 
-[tool.black]
-target-version = ["py311"]
+[tool.uv]
+package = true
+
+[tool.ruff]
 line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B"]
+
+[tool.ruff.format]

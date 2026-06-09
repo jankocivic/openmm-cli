@@ -1,4 +1,5 @@
 """Wrap molecules back into the primary unit cell (periodic imaging)."""
+
 from pathlib import Path
 from typing import Annotated
 

@@ -1,4 +1,5 @@
 """Add a water box and counterions to a structure using pdbfixer."""
+
 from pathlib import Path
 from typing import Annotated, Literal
 
@@ -9,18 +10,35 @@ from pdbfixer import PDBFixer
 
 
 def command(
-    pdb: Annotated[Path, typer.Argument(help="Input PDB file (typically already cleaned).")],
-    output: Annotated[Path, typer.Option("--out", help="Output solvated PDB file.")] = Path("solvated.pdb"),
-    padding: Annotated[float, typer.Option("--padding",
-        help="Minimum distance (nm) from solute to box edge.")] = 1.0,
-    box_shape: Annotated[Literal["cube", "dodecahedron", "octahedron"], typer.Option("--box-shape",
-        help="Shape of the periodic box.")] = "cube",
-    ionic_strength: Annotated[float, typer.Option("--ionic-strength",
-        help="Ionic strength in mol/L (physiological ~0.15).")] = 0.15,
-    positive_ion: Annotated[str, typer.Option("--positive-ion",
-        help="Cation species (Na+, K+, Li+, Rb+, Cs+).")] = "Na+",
-    negative_ion: Annotated[str, typer.Option("--negative-ion",
-        help="Anion species (Cl-, Br-, F-, I-).")] = "Cl-",
+    pdb: Annotated[
+        Path, typer.Argument(help="Input PDB file (typically already cleaned).")
+    ],
+    output: Annotated[
+        Path, typer.Option("--out", help="Output solvated PDB file.")
+    ] = Path("solvated.pdb"),
+    padding: Annotated[
+        float,
+        typer.Option(
+            "--padding", help="Minimum distance (nm) from solute to box edge."
+        ),
+    ] = 1.0,
+    box_shape: Annotated[
+        Literal["cube", "dodecahedron", "octahedron"],
+        typer.Option("--box-shape", help="Shape of the periodic box."),
+    ] = "cube",
+    ionic_strength: Annotated[
+        float,
+        typer.Option(
+            "--ionic-strength", help="Ionic strength in mol/L (physiological ~0.15)."
+        ),
+    ] = 0.15,
+    positive_ion: Annotated[
+        str,
+        typer.Option("--positive-ion", help="Cation species (Na+, K+, Li+, Rb+, Cs+)."),
+    ] = "Na+",
+    negative_ion: Annotated[
+        str, typer.Option("--negative-ion", help="Anion species (Cl-, Br-, F-, I-).")
+    ] = "Cl-",
 ) -> None:
     """Add a water box and counterions to bring the system to the target ionic strength."""
     print(f"Loading {pdb}")
@@ -38,11 +56,17 @@ def command(
 
     n_after = sum(1 for _ in fixer.topology.atoms())
     n_waters = sum(1 for r in fixer.topology.residues() if r.name == "HOH")
-    n_pos = sum(1 for r in fixer.topology.residues() if r.name == positive_ion.rstrip("+"))
-    n_neg = sum(1 for r in fixer.topology.residues() if r.name == negative_ion.rstrip("-"))
+    n_pos = sum(
+        1 for r in fixer.topology.residues() if r.name == positive_ion.rstrip("+")
+    )
+    n_neg = sum(
+        1 for r in fixer.topology.residues() if r.name == negative_ion.rstrip("-")
+    )
 
     with open(output, "w") as f:
         PDBFile.writeFile(fixer.topology, fixer.positions, f)
 
-    print(f"Added {n_waters} waters, {n_pos} {positive_ion}, {n_neg} {negative_ion} "
-          f"({n_after - n_before} atoms total); wrote {output}")
+    print(
+        f"Added {n_waters} waters, {n_pos} {positive_ion}, {n_neg} {negative_ion} "
+        f"({n_after - n_before} atoms total); wrote {output}"
+    )
