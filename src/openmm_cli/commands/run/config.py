@@ -6,10 +6,17 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from openmm import unit
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    PlainSerializer,
+    PlainValidator,
+    model_validator,
+)
 
 # ---- Unit parsing -----------------------------------------------------------
 
@@ -71,15 +78,50 @@ def parse_quantity(value) -> unit.Quantity:
     return number * _UNIT_TOKENS[unit_str]
 
 
-def _q(v):
-    """Field validator helper."""
-    return None if v is None else parse_quantity(v)
+# Reverse of `_UNIT_TOKENS`, keyed by the unit's string form. The first token
+# for each unit wins, so short symbols ("K", "A", "kJ/mol/nm^2") are preferred
+# over their aliases.
+_UNIT_TO_TOKEN: dict[str, str] = {}
+for _token, _u in _UNIT_TOKENS.items():
+    _UNIT_TO_TOKEN.setdefault(str(_u), _token)
+
+
+def serialize_quantity(value: unit.Quantity) -> str:
+    """Render a Quantity as a `parse_quantity`-readable 'NUMBER UNIT' string.
+
+    Uses the canonical `_UNIT_TOKENS` spelling so a dumped config round-trips
+    back through `parse_quantity`. Falls back to OpenMM's own representation for
+    any unit not in the table (which would not re-parse, but should not occur
+    for configured fields).
+    """
+    token = _UNIT_TO_TOKEN.get(str(value.unit))
+    if token is None:
+        return str(value)
+    return f"{value.value_in_unit(value.unit)} {token}"
+
+
+# A physical quantity field. `PlainValidator` fully replaces Pydantic's inner
+# validation, so the underlying openmm `Quantity` needs no schema -- which is
+# what lets us drop `arbitrary_types_allowed` everywhere. `PlainSerializer`
+# dumps it back to a string `parse_quantity` can read, so a resolved Config is
+# directly reusable as input.
+Quantity = Annotated[
+    unit.Quantity,
+    PlainValidator(parse_quantity),
+    PlainSerializer(serialize_quantity, return_type=str),
+]
+
+
+class _Base(BaseModel):
+    """Shared base: reject unknown keys so typos in YAML fail loudly."""
+
+    model_config = ConfigDict(extra="forbid")
 
 
 # ---- System ----------------------------------------------------------------
 
 
-class SystemSources(BaseModel):
+class SystemSources(_Base):
     """What we're simulating.
 
     Supported combinations:
@@ -110,26 +152,22 @@ class SystemSources(BaseModel):
         return self
 
 
-class SystemSettings(BaseModel):
+class SystemSettings(_Base):
     """How forces are computed -- args to prmtop.createSystem()."""
-
-    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     nonbonded_method: Literal[
         "NoCutoff", "CutoffNonPeriodic", "CutoffPeriodic", "Ewald", "PME"
     ] = "PME"
-    nonbonded_cutoff: unit.Quantity = "1.0 nm"
+    nonbonded_cutoff: Quantity = 1.0 * unit.nanometers
     constraints: Literal["HBonds", "AllBonds", "HAngles"] | None = "HBonds"
     rigid_water: bool = True
-    hydrogen_mass: unit.Quantity | None = None
-
-    _v = field_validator("nonbonded_cutoff", "hydrogen_mass", mode="before")(_q)
+    hydrogen_mass: Quantity | None = None
 
 
 # ---- Platform --------------------------------------------------------------
 
 
-class PlatformConfig(BaseModel):
+class PlatformConfig(_Base):
     name: Literal["CUDA", "OpenCL", "CPU", "Reference"] = "CPU"
     precision: Literal["single", "mixed", "double"] = "mixed"
     device_index: str | None = None  # e.g. "0" or "0,1"
@@ -138,28 +176,20 @@ class PlatformConfig(BaseModel):
 # ---- Integrator / barostat -------------------------------------------------
 
 
-class IntegratorConfig(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True, validate_default=True)
-
+class IntegratorConfig(_Base):
     type: Literal["LangevinMiddle", "Langevin", "Verlet"] = "LangevinMiddle"
-    timestep: unit.Quantity = "2 fs"
-    temperature: unit.Quantity = "300 K"
-    friction: unit.Quantity = "1.0 /ps"
-
-    _v = field_validator("timestep", "temperature", "friction", mode="before")(_q)
+    timestep: Quantity = 2 * unit.femtoseconds
+    temperature: Quantity = 300 * unit.kelvin
+    friction: Quantity = 1.0 / unit.picoseconds
 
 
-class BarostatConfig(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True, validate_default=True)
-
+class BarostatConfig(_Base):
     type: Literal["MonteCarloBarostat"] = "MonteCarloBarostat"
-    pressure: unit.Quantity = "1 atm"
+    pressure: Quantity = 1 * unit.atmospheres
     frequency: int = 25
 
-    _v = field_validator("pressure", mode="before")(_q)
 
-
-class Defaults(BaseModel):
+class Defaults(_Base):
     """Settings applied to every dynamics stage unless overridden."""
 
     integrator: IntegratorConfig = IntegratorConfig()
@@ -169,20 +199,16 @@ class Defaults(BaseModel):
 # ---- Restraints ------------------------------------------------------------
 
 
-class PositionalRestraint(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True, validate_default=True)
-
+class PositionalRestraint(_Base):
     type: Literal["positional"] = "positional"
     selection: str  # mdtraj-style, e.g. "not water and not element H"
-    force_constant: unit.Quantity
-
-    _v = field_validator("force_constant", mode="before")(_q)
+    force_constant: Quantity
 
 
 # ---- Reporters -------------------------------------------------------------
 
 
-class TrajectoryReporter(BaseModel):
+class TrajectoryReporter(_Base):
     file: Path
     interval: int
     format: (
@@ -191,12 +217,12 @@ class TrajectoryReporter(BaseModel):
     # If None, format is inferred from the file extension.
 
 
-class ReporterFile(BaseModel):
+class ReporterFile(_Base):
     file: Path
     interval: int
 
 
-class Reporters(BaseModel):
+class Reporters(_Base):
     trajectory: TrajectoryReporter | None = None  # DCD/XTC/PDB/HDF5/NetCDF
     state: ReporterFile | None = None  # CSV state data
     checkpoint: ReporterFile | None = None  # binary checkpoint
@@ -205,31 +231,28 @@ class Reporters(BaseModel):
 # ---- Stages ----------------------------------------------------------------
 
 
-class MinimizationStage(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True, validate_default=True)
-
+class MinimizationStage(_Base):
     name: str
     type: Literal["minimization"]
     max_iterations: int = 0  # 0 = until convergence
-    tolerance: unit.Quantity = "10 kJ/mol/nm"
+    tolerance: Quantity = 10 * unit.kilojoules_per_mole / unit.nanometer
     restraints: list[PositionalRestraint] = []
 
-    _v = field_validator("tolerance", mode="before")(_q)
 
-
-class DynamicsStage(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True, validate_default=True)
-
+class DynamicsStage(_Base):
     name: str
     type: Literal["dynamics"]
     steps: int
-    start_temperature: unit.Quantity | None = None
+    start_temperature: Quantity | None = None
 
-    # Per-stage overrides. None means "use default".
-    integrator: IntegratorConfig | None = None
-    barostat: BarostatConfig | None = None
+    # Per-stage overrides of the default integrator's temperature and timestep;
+    # anything left None inherits from `defaults.integrator`. The integrator type
+    # and friction cannot be overridden per stage.
+    temperature: Quantity | None = None
+    timestep: Quantity | None = None
 
-    # Explicitly turn off the barostat for this stage (e.g. NVT after NPT default).
+    # The barostat comes from `defaults`; it can only be turned off for a stage
+    # (e.g. NVT after an NPT default), not reconfigured.
     disable_barostat: bool = False
 
     # Re-draw velocities from the Maxwell-Boltzmann distribution at stage start.
@@ -239,14 +262,12 @@ class DynamicsStage(BaseModel):
     restraints: list[PositionalRestraint] = []
     reporters: Reporters = Reporters()
 
-    _v = field_validator("start_temperature", mode="before")(_q)
 
-
-class AnalysisStage(BaseModel):
+class AnalysisStage(_Base):
     name: str
     type: Literal["analysis"]
     command: str  # which trajectory command, e.g. "rmsd"
-    args: dict = {}  # YAML keys match the command's CLI flags
+    args: dict[str, Any] = {}  # YAML keys match the command's CLI flags
 
 
 Stage = Annotated[
@@ -258,7 +279,7 @@ Stage = Annotated[
 # ---- Root ------------------------------------------------------------------
 
 
-class Config(BaseModel):
+class Config(_Base):
     system: SystemSources
     system_settings: SystemSettings = SystemSettings()
     platform: PlatformConfig = PlatformConfig()
