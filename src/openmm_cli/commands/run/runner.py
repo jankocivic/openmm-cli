@@ -1,8 +1,8 @@
 """The :class:`Runner` ties the building blocks together and drives the stages.
 
-It owns the live simulation state shared across stages (the OpenMM
-``Simulation``, ``System`` and topology, plus the indices of currently-applied
-restraint forces) and executes each configured stage via the stage registry.
+It owns the live ``Simulation`` (built by :func:`~.system.build_simulation`),
+exposes its ``system`` and ``topology`` to stages, and executes each configured
+stage in order, resetting per-stage bookkeeping between them.
 """
 
 from __future__ import annotations
@@ -10,12 +10,8 @@ from __future__ import annotations
 import yaml
 from openmm import app
 
-from .barostat import add_default_barostat
 from .config import Config
-from .restraints import apply_restraints
-from .stages import get_stage_handler
-from .state import load_state
-from .system import build_integrator, build_platform, build_system
+from .system import build_simulation
 
 
 class Runner:
@@ -23,64 +19,48 @@ class Runner:
         self.cfg = cfg
         self.output_dir = cfg.output_dir
         self.simulation: app.Simulation | None = None
-        self.system = None
-        self.topology = None
-        # Force indices of the restraints applied by the current stage.
-        self.restraint_indices: list[int] = []
+
+    @property
+    def system(self):
+        """The OpenMM ``System`` (owned by the simulation)."""
+        return self.simulation.system
+
+    @property
+    def topology(self):
+        """The OpenMM ``Topology`` (owned by the simulation)."""
+        return self.simulation.topology
 
     def setup(self) -> None:
-        """Build the system and simulation and load initial coordinates."""
+        """Build the starting simulation and report what was set up."""
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self._write_resolved_config()
         self._announce_coordinate_source()
 
-        built = build_system(self.cfg)
-        self.topology = built.topology
-        self.system = built.system
+        self.simulation = build_simulation(self.cfg)
+
         print(
             f"System: {self.system.getNumParticles()} particles, "
             f"{self.system.getNumConstraints()} constraints"
         )
-
-        add_default_barostat(self.system, self.cfg)
-
-        integrator = build_integrator(self.cfg.defaults.integrator)
-        platform, plat_props = build_platform(self.cfg)
-        self.simulation = app.Simulation(
-            self.topology, self.system, integrator, platform, plat_props
-        )
-
-        if built.positions is not None:
-            self.simulation.context.setPositions(built.positions)
-        if built.box_vectors is not None:
-            self.simulation.context.setPeriodicBoxVectors(*built.box_vectors)
-        if self.cfg.system.restart_from is not None:
-            load_state(self.simulation, self.cfg.system.restart_from)
-
         print(
             f"Platform: {self.simulation.context.getPlatform().getName()} "
             f"({self.cfg.platform.precision} precision)"
         )
 
     def run(self) -> None:
-        """Build the simulation (if needed) and execute every stage in order."""
-        if self.simulation is None:
-            self.setup()
+        """Build the simulation and execute every stage in order."""
+        self.setup()
         for stage in self.cfg.stages:
             print(f"\n=== Stage: {stage.name} ({stage.type}) ===")
-            handler = get_stage_handler(type(stage))
-            handler(self, stage)
+            stage.run(self)
+            self._reset_after_stage()
         print("\nAll stages complete.")
 
-    def apply_stage_restraints(self, restraints) -> None:
-        """Swap the active restraint forces for those of the current stage."""
-        self.restraint_indices = apply_restraints(
-            self.simulation,
-            self.system,
-            self.topology,
-            restraints,
-            self.restraint_indices,
-        )
+    def _reset_after_stage(self) -> None:
+        """Clear per-stage bookkeeping so the next stage starts clean."""
+        self.simulation.reporters.clear()
+        self.simulation.currentStep = 0
+        self.simulation.context.setTime(0)
 
     def _announce_coordinate_source(self) -> None:
         system = self.cfg.system
@@ -88,13 +68,7 @@ class Runner:
         print(f"Loading coordinates from {source}")
 
     def _write_resolved_config(self) -> None:
-        """Dump the fully-resolved config (user inputs + defaults) for the record.
-
-        Quantities are serialized via the model's ``PlainSerializer`` (e.g. back
-        to ``"300 K"``), and ``Path`` fields to plain strings, so the result is a
-        readable snapshot of exactly what this run used -- including every default
-        that was filled in for values the user left out.
-        """
+        """Dump the fully-resolved config (user inputs + defaults) for the record."""
         path = self.output_dir / "resolved_config.yaml"
         resolved = self.cfg.model_dump(mode="json")
         header = (

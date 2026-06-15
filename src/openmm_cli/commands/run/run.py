@@ -1,16 +1,13 @@
 """``run`` command: drive an MD simulation from a YAML config.
 
-This module is intentionally thin. The work is split across focused modules
-within this package:
+The work is split across focused modules within this package:
 
   - :mod:`.config`     -- the configuration data models (the "what")
-  - :mod:`.system`     -- build the OpenMM system, integrator and platform
-  - :mod:`.restraints` -- positional (and future) restraint forces
-  - :mod:`.barostat`   -- barostat creation and per-stage configuration
+  - :mod:`.system`     -- build the OpenMM system/integrator/platform and the
+                          fully-initialized starting simulation
+  - :mod:`.restraints` -- restraint models + the `restrain` context manager
   - :mod:`.reporters`  -- trajectory/state/checkpoint/progress reporters
-  - :mod:`.state`      -- save/load serialized simulation state
-  - :mod:`.analysis`   -- run trajectory analysis commands as stages
-  - :mod:`.stages`     -- stage handlers + the stage dispatch registry
+  - :mod:`.stage_types`-- the stage framework + one module per stage type
   - :mod:`.runner`     -- the Runner that wires it together and drives stages
 """
 

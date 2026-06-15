@@ -1,83 +1,88 @@
-"""Positional (and future) restraint forces.
+"""Restraint force definitions and application.
 
-Each restraint type is registered against the matching config model via
-:func:`register_restraint`. To add a new restraint type, add a config model in
-:mod:`.config` and register a force factory here -- no other code needs to
-change.
+All restraint types live here. Each is a :class:`RestraintBase` subclass that
+carries its own config *and* builds its OpenMM force via ``build()``. To add a
+restraint type:
+
+  1. define a ``RestraintBase`` subclass with a unique ``type: Literal[...]``
+     and a ``build()`` method, and
+  2. add it to the :data:`Restraint` union below.
+
+Stages apply restraints with the :func:`restrain` context manager, which adds
+the forces for the duration of the block and removes them on exit (even if the
+block raises). The runner does not track restraints at all.
 """
 
 from __future__ import annotations
 
-from typing import Callable
+from contextlib import contextmanager
+from typing import Literal
 
 import mdtraj as md
 import openmm as mm
 from openmm import unit
+from pydantic import BaseModel, ConfigDict
 
-from .config import PositionalRestraint
-
-# A factory takes (restraint_config, openmm_topology, positions) -> Force.
-RestraintFactory = Callable[[object, object, object], mm.Force]
-
-_RESTRAINT_FACTORIES: dict[type, RestraintFactory] = {}
+from .config import Quantity
 
 
-def register_restraint(config_type: type) -> Callable[[RestraintFactory], RestraintFactory]:
-    """Register a force factory for a restraint config model."""
+class RestraintBase(BaseModel):
+    """Base class for every restraint type."""
 
-    def decorator(factory: RestraintFactory) -> RestraintFactory:
-        _RESTRAINT_FACTORIES[config_type] = factory
-        return factory
+    # Reject unknown keys so typos in a restraint's YAML fail loudly.
+    model_config = ConfigDict(extra="forbid")
 
-    return decorator
+    def build(self, topology, positions) -> mm.Force:
+        """Build the OpenMM force for this restraint. Override this."""
+        raise NotImplementedError
 
 
-def _select_atoms(omm_topology, selection: str) -> list[int]:
-    mdt_top = md.Topology.from_openmm(omm_topology)
-    indices = mdt_top.select(selection)
+def _select_atoms(topology, selection: str) -> list[int]:
+    indices = md.Topology.from_openmm(topology).select(selection)
     if len(indices) == 0:
         raise ValueError(f"Selection {selection!r} matched no atoms")
     return [int(i) for i in indices]
 
 
-@register_restraint(PositionalRestraint)
-def _make_positional_restraint_force(r: PositionalRestraint, omm_topology, positions):
-    force = mm.CustomExternalForce("0.5*k*((x-x0)^2 + (y-y0)^2 + (z-z0)^2)")
-    force.addGlobalParameter("k", r.force_constant)
-    force.addPerParticleParameter("x0")
-    force.addPerParticleParameter("y0")
-    force.addPerParticleParameter("z0")
+class PositionalRestraint(RestraintBase):
+    type: Literal["positional"] = "positional"
+    selection: str  # mdtraj-style, e.g. "not water and not element H"
+    force_constant: Quantity
 
-    for i in _select_atoms(omm_topology, r.selection):
-        p = positions[i].value_in_unit(unit.nanometer)
-        force.addParticle(i, [p[0], p[1], p[2]])
-    return force
-
-
-def _make_restraint_force(r, omm_topology, positions) -> mm.Force:
-    factory = _RESTRAINT_FACTORIES.get(type(r))
-    if factory is None:
-        raise ValueError(f"Unsupported restraint type: {type(r).__name__}")
-    return factory(r, omm_topology, positions)
+    def build(self, topology, positions) -> mm.Force:
+        force = mm.CustomExternalForce("0.5*k*((x-x0)^2 + (y-y0)^2 + (z-z0)^2)")
+        force.addGlobalParameter("k", self.force_constant)
+        force.addPerParticleParameter("x0")
+        force.addPerParticleParameter("y0")
+        force.addPerParticleParameter("z0")
+        for i in _select_atoms(topology, self.selection):
+            p = positions[i].value_in_unit(unit.nanometer)
+            force.addParticle(i, [p[0], p[1], p[2]])
+        return force
 
 
-def apply_restraints(
-    simulation, system, omm_topology, restraints, prev_indices
-) -> list[int]:
-    """Replace the previously-added restraint forces with ``restraints``.
+# All restraint types. When adding a second, make this a discriminated union:
+#   from typing import Annotated
+#   from pydantic import Field
+#   Restraint = Annotated[
+#       PositionalRestraint | FlatBottomRestraint, Field(discriminator="type")
+#   ]
+Restraint = PositionalRestraint
 
-    Returns the force indices of the newly added restraints so the caller can
-    remove them again before the next stage.
-    """
-    for idx in sorted(prev_indices, reverse=True):
-        system.removeForce(idx)
 
-    new_indices: list[int] = []
+@contextmanager
+def restrain(simulation, system, topology, restraints):
+    """Apply ``restraints`` for the duration of the block, then remove them."""
+    indices: list[int] = []
     if restraints:
         positions = simulation.context.getState(getPositions=True).getPositions()
         for r in restraints:
-            force = _make_restraint_force(r, omm_topology, positions)
-            new_indices.append(system.addForce(force))
-
-    simulation.context.reinitialize(preserveState=True)
-    return new_indices
+            indices.append(system.addForce(r.build(topology, positions)))
+        simulation.context.reinitialize(preserveState=True)
+    try:
+        yield
+    finally:
+        if indices:
+            for idx in sorted(indices, reverse=True):
+                system.removeForce(idx)
+            simulation.context.reinitialize(preserveState=True)
