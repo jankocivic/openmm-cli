@@ -1,15 +1,41 @@
-"""Construction of OpenMM reporters for a dynamics stage."""
+"""Reporter config models and construction for a dynamics stage.
+
+Owns both the config models (what the user requests in YAML) and the code that
+turns them into OpenMM reporters.
+"""
 
 from __future__ import annotations
 
 import sys
 from pathlib import Path
+from typing import Literal
 
 from mdtraj.reporters import DCDReporter as MDTrajDCDReporter
 from mdtraj.reporters import HDF5Reporter, NetCDFReporter
 from openmm import app
 
-from .config import Reporters
+from .config import _Base
+
+
+class TrajectoryReporter(_Base):
+    file: Path
+    interval: int
+    format: (
+        Literal["dcd", "xtc", "pdb", "pdbx", "hdf5", "h5", "netcdf", "nc"] | None
+    ) = None
+    # If None, format is inferred from the file extension.
+
+
+class ReporterFile(_Base):
+    file: Path
+    interval: int
+
+
+class Reporters(_Base):
+    trajectory: TrajectoryReporter | None = None  # DCD/XTC/PDB/HDF5/NetCDF
+    state: ReporterFile | None = None  # CSV state data
+    checkpoint: ReporterFile | None = None  # binary checkpoint
+
 
 # Trajectory file format -> reporter class.
 _TRAJECTORY_REPORTERS = {
@@ -69,7 +95,7 @@ def _make_progress_reporter(stage_steps: int):
 
 
 def build_reporters(reporters_cfg: Reporters, stage_steps: int, output_dir: Path) -> list:
-    """Build the reporters for a dynamics stage (file outputs + console progress)."""
+    """Build the reporters for a stage (file outputs + console progress)."""
     out = []
     if reporters_cfg.trajectory:
         out.append(_make_trajectory_reporter(reporters_cfg.trajectory, output_dir))

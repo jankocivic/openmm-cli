@@ -1,9 +1,4 @@
-"""Construction of the OpenMM system, integrator and platform from config.
-
-These helpers turn the static configuration (see :mod:`.config`) into the live
-OpenMM objects needed to build a ``Simulation``. They are deliberately free of
-any simulation-driving logic so they can be reused and tested in isolation.
-"""
+"""Construction of the OpenMM system, integrator and platform from config."""
 
 from __future__ import annotations
 
@@ -114,3 +109,46 @@ def build_platform(cfg: Config) -> tuple[mm.Platform, dict[str, str]]:
         if cfg.platform.device_index is not None:
             props[f"{cfg.platform.name}DeviceIndex"] = cfg.platform.device_index
     return platform, props
+
+
+def add_barostat(system, cfg: Config) -> None:
+    """Add the default Monte Carlo barostat to ``system`` if one is configured.
+
+    Must run before the ``Context`` (i.e. the ``Simulation``) is created. A
+    dynamics stage may later disable or re-sync it.
+    """
+    b = cfg.defaults.barostat
+    if b is None:
+        return
+    system.addForce(
+        mm.MonteCarloBarostat(
+            b.pressure, cfg.defaults.integrator.temperature, b.frequency
+        )
+    )
+
+
+def build_simulation(cfg: Config) -> app.Simulation:
+    """Build the fully-initialized starting ``Simulation`` from ``cfg``.
+
+    Assembles the system (plus the default barostat), integrator and platform,
+    constructs the ``Simulation``, sets the initial coordinates/box, and applies
+    a restart state if one was given. Free of side effects apart from reading
+    the input files, so it can be exercised in isolation.
+    """
+    built = build_system(cfg)
+    add_barostat(built.system, cfg)
+    integrator = build_integrator(cfg.defaults.integrator)
+    platform, plat_props = build_platform(cfg)
+    simulation = app.Simulation(
+        built.topology, built.system, integrator, platform, plat_props
+    )
+
+    if built.positions is not None:
+        simulation.context.setPositions(built.positions)
+    if built.box_vectors is not None:
+        simulation.context.setPeriodicBoxVectors(*built.box_vectors)
+    if cfg.system.restart_from is not None:
+        with open(cfg.system.restart_from) as f:
+            simulation.context.setState(mm.XmlSerializer.deserialize(f.read()))
+
+    return simulation
