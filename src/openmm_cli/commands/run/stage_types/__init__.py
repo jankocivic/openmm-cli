@@ -1,30 +1,16 @@
-"""Pipeline stages: the framework and the stage-type definitions.
-
-The framework (``StageBase``, ``register_stage``, ``get_stage_model``) lives
-here; each module in this package defines one ``StageBase`` subclass decorated
-with ``@register_stage``. Dropping a new module in this folder is all that is
-required to add a stage type -- the discovery loop at the bottom imports every
-module so its registration runs, and nothing else needs to change.
-
-A stage subclass must:
-
-  * subclass ``StageBase`` (which gives it the required ``name`` field),
-  * declare a unique single-value ``type: Literal["..."]`` -- both the YAML
-    ``type:`` value and the registry key,
-  * implement ``run(self, runner)``.
-
-Stage handlers are deliberately close to plain OpenMM: a stage reads/writes the
-live ``runner.simulation`` directly. See ``STAGE_CONTRACT.md`` for what state
-persists between stages.
-"""
+"""Pipeline stages: the framework and the stage-type definitions."""
 
 from __future__ import annotations
 
 import importlib
 import pkgutil
-from typing import TYPE_CHECKING, get_args
+from typing import TYPE_CHECKING, ClassVar, get_args
 
 from pydantic import BaseModel, ConfigDict
+
+from ..config import Defaults
+from ..reporters import Reporters
+from ..restraints import Restraint
 
 if TYPE_CHECKING:
     from ..runner import Runner
@@ -42,8 +28,41 @@ class StageBase(BaseModel):
     # Subclasses pin `type`, e.g. `type: Literal["dynamics"]`.
 
     def run(self, runner: "Runner") -> None:
-        """Execute the stage against the live simulation. Override this."""
+        """Execute the stage. Override this."""
         raise NotImplementedError
+
+
+class SimulationStage(StageBase):
+    """Base for stages that advance a freshly-built simulation.
+
+    The runner builds the simulation for these stages -- resolving ``defaults``
+    over the run defaults and adding ``restraints`` -- then captures and saves the
+    resulting state. The stage's ``run`` only advances the simulation.
+    """
+
+    defaults: Defaults | None = None     # per-stage override of the run defaults
+    restraints: list[Restraint] = []
+    reporters: Reporters = Reporters()
+
+    # Stages that drive temperature (e.g. heating) set this so the config can
+    # reject them under a non-thermostatted (Verlet) integrator.
+    requires_thermostat: ClassVar[bool] = False
+
+    def build(self, cfg, defaults, state):
+        """Construct this stage's simulation, seeded from the carried ``state``.
+
+        The default builds the standard simulation -- system + ``defaults.barostat``
+        + this stage's ``restraints``, with the integrator/platform from the
+        resolved ``defaults``. Override this for methods that assemble the
+        simulation differently (e.g. metadynamics or alchemical free energy, which
+        add forces before the context and may step via their own helper object);
+        compose ``system.build_system`` / ``build_integrator`` / ``make_platform``
+        as needed.
+        """
+        # Local import avoids a config <-> system import cycle at module load.
+        from ..system import build_simulation
+
+        return build_simulation(cfg, defaults, self.restraints, state)
 
 
 def _tag_of(cls: type[StageBase]) -> str:

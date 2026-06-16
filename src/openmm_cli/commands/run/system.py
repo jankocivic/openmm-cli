@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import openmm as mm
 from openmm import app
 
-from .config import Config, IntegratorConfig
+from .config import Config, Defaults, IntegratorConfig, PlatformConfig
 
 
 @dataclass
@@ -100,51 +100,48 @@ def build_integrator(cfg: IntegratorConfig) -> mm.Integrator:
     return factory(cfg)
 
 
-def build_platform(cfg: Config) -> tuple[mm.Platform, dict[str, str]]:
+def make_platform(platform: PlatformConfig) -> tuple[mm.Platform, dict[str, str]]:
     """Return the platform and its property dict for ``Simulation``."""
-    platform = mm.Platform.getPlatformByName(cfg.platform.name)
+    plat = mm.Platform.getPlatformByName(platform.name)
     props: dict[str, str] = {}
-    if cfg.platform.name in ("CUDA", "OpenCL"):
-        props[f"{cfg.platform.name}Precision"] = cfg.platform.precision
-        if cfg.platform.device_index is not None:
-            props[f"{cfg.platform.name}DeviceIndex"] = cfg.platform.device_index
-    return platform, props
+    if platform.name in ("CUDA", "OpenCL"):
+        props[f"{platform.name}Precision"] = platform.precision
+        if platform.device_index is not None:
+            props[f"{platform.name}DeviceIndex"] = platform.device_index
+    return plat, props
 
 
-def add_barostat(system, cfg: Config) -> None:
-    """Add the configured barostat to ``system`` if one is set.
+def build_simulation(
+    cfg: Config, defaults: Defaults, restraints, state=None
+) -> app.Simulation:
+    """Build a fresh ``Simulation`` for one stage.
 
-    Must run before the ``Context`` (i.e. the ``Simulation``) is created. A
-    dynamics or heat stage may later disable or re-sync it.
-    """
-    if cfg.defaults.barostat is not None:
-        system.addForce(
-            cfg.defaults.barostat.build(cfg.defaults.integrator.temperature)
-        )
-
-
-def build_simulation(cfg: Config) -> app.Simulation:
-    """Build the fully-initialized starting ``Simulation`` from ``cfg``.
-
-    Assembles the system (plus the default barostat), integrator and platform,
-    constructs the ``Simulation``, sets the initial coordinates/box, and applies
-    a restart state if one was given. Free of side effects apart from reading
-    the input files, so it can be exercised in isolation.
+    Assembles the system (plus ``defaults.barostat`` and this stage's
+    ``restraints``), the integrator and platform from the resolved ``defaults``,
+    then seeds the context from ``state`` (the previous stage's positions /
+    velocities / box) or, for the first stage, from the input files. Free of side
+    effects apart from reading the input files.
     """
     built = build_system(cfg)
-    add_barostat(built.system, cfg)
-    integrator = build_integrator(cfg.defaults.integrator)
-    platform, plat_props = build_platform(cfg)
+    if defaults.barostat is not None:
+        built.system.addForce(
+            defaults.barostat.build(defaults.integrator.temperature)
+        )
+    anchor = state.getPositions() if state is not None else built.positions
+    for restraint in restraints:
+        built.system.addForce(restraint.build(built.topology, anchor))
+
+    integrator = build_integrator(defaults.integrator)
+    platform, props = make_platform(defaults.platform)
     simulation = app.Simulation(
-        built.topology, built.system, integrator, platform, plat_props
+        built.topology, built.system, integrator, platform, props
     )
 
-    if built.positions is not None:
-        simulation.context.setPositions(built.positions)
-    if built.box_vectors is not None:
-        simulation.context.setPeriodicBoxVectors(*built.box_vectors)
-    if cfg.system.restart_from is not None:
-        with open(cfg.system.restart_from) as f:
-            simulation.context.setState(mm.XmlSerializer.deserialize(f.read()))
-
+    if state is not None:
+        simulation.context.setState(state)
+    else:
+        if built.positions is not None:
+            simulation.context.setPositions(built.positions)
+        if built.box_vectors is not None:
+            simulation.context.setPeriodicBoxVectors(*built.box_vectors)
     return simulation
