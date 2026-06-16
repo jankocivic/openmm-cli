@@ -64,6 +64,10 @@ class Runner:
             if isinstance(stage, SimulationStage):
                 defaults = merge_defaults(self.cfg.defaults, stage.defaults)
                 self.simulation = stage.build(self.cfg, defaults, state)
+                # `setState` carried the step count and clock forward; zero them
+                # so each stage's reporters count from 0 (progress, time, etc.).
+                self.simulation.currentStep = 0
+                self.simulation.context.setTime(0)
                 stage.run(self)
                 state = self.simulation.context.getState(
                     getPositions=True, getVelocities=True
