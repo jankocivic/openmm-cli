@@ -56,12 +56,10 @@ def command(
 
     n_after = sum(1 for _ in fixer.topology.atoms())
     n_waters = sum(1 for r in fixer.topology.residues() if r.name == "HOH")
-    n_pos = sum(
-        1 for r in fixer.topology.residues() if r.name == positive_ion.rstrip("+")
-    )
-    n_neg = sum(
-        1 for r in fixer.topology.residues() if r.name == negative_ion.rstrip("-")
-    )
+    pos = positive_ion.rstrip("+").upper()   
+    neg = negative_ion.rstrip("-").upper()    
+    n_pos = sum(1 for r in fixer.topology.residues() if r.name.upper() == pos)
+    n_neg = sum(1 for r in fixer.topology.residues() if r.name.upper() == neg)
 
     with open(output, "w") as f:
         PDBFile.writeFile(fixer.topology, fixer.positions, f)
