@@ -48,8 +48,9 @@ class Runner:
         )
 
     def run(self) -> None:
-        """Build the simulation and execute every stage in order."""
-        self.setup()
+        """Build the simulation if needed and execute every stage in order."""
+        if self.simulation is None:
+            self.setup()
         for stage in self.cfg.stages:
             print(f"\n=== Stage: {stage.name} ({stage.type}) ===")
             stage.run(self)

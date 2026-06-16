@@ -1,12 +1,4 @@
-"""Molecular dynamics stage: integrate the current state for ``steps``.
-
-The thermostat (integrator) and barostat are fixed for the run; this stage only
-optionally overrides the timestep and thermostat temperature, toggles the
-barostat off (NVT for this stage), and randomizes velocities. With no overrides
-it simply continues the current thermodynamic state, so it serves NVE, NVT and
-NPT uniformly. Cross-cutting validity (e.g. ``temperature`` needs a thermostat)
-is enforced in ``config.Config``.
-"""
+"""Heating stage: ramp the thermostat temperature from start to target."""
 
 from __future__ import annotations
 
@@ -24,16 +16,30 @@ if TYPE_CHECKING:
     from ..runner import Runner
 
 
+def _ramp_temperature(simulation, start_T, end_T, steps, n_chunks=100):
+    """Ramp the integrator temperature from ``start_T`` to ``end_T`` over ``steps``."""
+    chunk = steps // n_chunks
+    print(f"  Heating from {start_T} to {end_T} over {steps} steps")
+    simulation.context.setVelocitiesToTemperature(start_T)
+    for i in range(n_chunks):
+        simulation.integrator.setTemperature(
+            start_T + (end_T - start_T) * (i + 1) / n_chunks
+        )
+        simulation.step(chunk)
+    leftover = steps - chunk * n_chunks
+    if leftover:
+        simulation.step(leftover)
+
+
 @register_stage
-class DynamicsStage(StageBase):
-    type: Literal["dynamics"]
+class HeatStage(StageBase):
+    type: Literal["heat"]
     steps: int
+    start_temperature: Quantity
+    temperature: Quantity  # target
     timestep: Quantity | None = None
-    temperature: Quantity | None = None  # thermostat setpoint override (thermostat only)
     disable_barostat: bool = False
-    # If set, draw velocities from Maxwell-Boltzmann at this temperature at stage
-    # start (valid for any integrator).
-    randomize_velocities: Quantity | None = None
+    n_chunks: int = 100  # ramp granularity
     restraints: list[Restraint] = []
     reporters: Reporters = Reporters()
 
@@ -43,20 +49,18 @@ class DynamicsStage(StageBase):
 
         if self.timestep is not None:
             integrator.setStepSize(self.timestep)
-        if self.temperature is not None:  # safe: config forbids this under Verlet
-            integrator.setTemperature(self.temperature)
+        # Safe: config forbids a `temperature` (which heat always sets) under Verlet.
+        integrator.setTemperature(self.start_temperature)
 
         configure_barostat(sim, runner.system, runner.cfg, self.disable_barostat)
-
-        if self.randomize_velocities is not None:
-            sim.context.setVelocitiesToTemperature(self.randomize_velocities)
 
         for reporter in build_reporters(self.reporters, self.steps, runner.output_dir):
             sim.reporters.append(reporter)
 
-        print(f"  Running {self.steps} steps")
         with restrain(sim, runner.system, runner.topology, self.restraints):
-            sim.step(self.steps)
+            _ramp_temperature(
+                sim, self.start_temperature, self.temperature, self.steps, self.n_chunks
+            )
 
         state = sim.context.getState(getPositions=True, getVelocities=True)
         with open(runner.output_dir / f"{self.name}.xml", "w") as f:

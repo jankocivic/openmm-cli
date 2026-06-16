@@ -67,6 +67,7 @@ defaults:
     timestep: 2 fs
     temperature: 300 K
   barostat:
+    type: isotropic
     pressure: 1 atm
     frequency: 25
 
@@ -80,7 +81,7 @@ stages:
   - name: production
     type: dynamics
     steps: 2500000
-    initialize_velocities: true
+    randomize_velocities: 300 K
     reporters:
       trajectory: { file: prod.dcd, interval: 5000 }
       state:      { file: prod.csv, interval: 1000 }

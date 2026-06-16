@@ -25,7 +25,7 @@ defaults:
     temperature: 300 K
     friction: 1.0 /ps
   barostat:
-    type: MonteCarloBarostat
+    type: isotropic
     pressure: 1 atm
     frequency: 25
 
@@ -37,10 +37,10 @@ stages:
     max_iterations: 1000
 
   - name: heat
-    type: dynamics
+    type: heat
     steps: 5000                       # 10 ps
     start_temperature: 100 K
-    initialize_velocities: true
+    temperature: 300 K                # ramp target
     disable_barostat: true            # NVT
     restraints:
       - type: positional

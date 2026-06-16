@@ -112,19 +112,15 @@ def build_platform(cfg: Config) -> tuple[mm.Platform, dict[str, str]]:
 
 
 def add_barostat(system, cfg: Config) -> None:
-    """Add the default Monte Carlo barostat to ``system`` if one is configured.
+    """Add the configured barostat to ``system`` if one is set.
 
     Must run before the ``Context`` (i.e. the ``Simulation``) is created. A
-    dynamics stage may later disable or re-sync it.
+    dynamics or heat stage may later disable or re-sync it.
     """
-    b = cfg.defaults.barostat
-    if b is None:
-        return
-    system.addForce(
-        mm.MonteCarloBarostat(
-            b.pressure, cfg.defaults.integrator.temperature, b.frequency
+    if cfg.defaults.barostat is not None:
+        system.addForce(
+            cfg.defaults.barostat.build(cfg.defaults.integrator.temperature)
         )
-    )
 
 
 def build_simulation(cfg: Config) -> app.Simulation:
