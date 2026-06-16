@@ -15,9 +15,6 @@ system_settings:
   constraints: HBonds
   rigid_water: true
 
-platform:
-  name: CPU             # change to CUDA if GPU is available
-
 defaults:
   integrator:
     type: LangevinMiddle
@@ -28,6 +25,8 @@ defaults:
     type: isotropic
     pressure: 1 atm
     frequency: 25
+  platform:
+    name: CPU           # change to CUDA if a GPU is available
 
 output_dir: output
 
@@ -41,7 +40,8 @@ stages:
     steps: 5000                       # 10 ps
     start_temperature: 100 K
     temperature: 300 K                # ramp target
-    disable_barostat: true            # NVT
+    defaults:
+      barostat: null                  # NVT for this stage
     restraints:
       - type: positional
         selection: "protein and not element H"

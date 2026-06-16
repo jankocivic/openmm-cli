@@ -1,67 +1,78 @@
-"""The :class:`Runner` ties the building blocks together and drives the stages.
+"""The :class:`Runner` drives the stages, rebuilding the simulation per stage.
 
-It owns the live ``Simulation`` (built by :func:`~.system.build_simulation`),
-exposes its ``system`` and ``topology`` to stages, and executes each configured
-stage in order, resetting per-stage bookkeeping between them.
+Between stages only the OpenMM ``State`` (positions, velocities, box vectors) is
+carried forward; each stage's simulation is built fresh from the run ``defaults``
+plus that stage's overrides. A ``branch`` stage reruns the remaining stages once
+per copy from the same state, into per-branch subdirectories. See
+``REBUILD_PLAN.md``.
 """
 
 from __future__ import annotations
 
+import openmm as mm
 import yaml
-from openmm import app
 
-from .config import Config
-from .system import build_simulation
+from .config import Config, merge_defaults
+from .stage_types import SimulationStage
 
 
 class Runner:
-    def __init__(self, cfg: Config) -> None:
+    def __init__(self, cfg: Config, simulation=None, output_dir=None) -> None:
         self.cfg = cfg
-        self.output_dir = cfg.output_dir
-        self.simulation: app.Simulation | None = None
+        self.simulation = simulation          # the current stage's Simulation, or None
+        self.output_dir = output_dir if output_dir is not None else cfg.output_dir
 
     @property
     def system(self):
-        """The OpenMM ``System`` (owned by the simulation)."""
+        """The OpenMM ``System`` of the current stage's simulation."""
         return self.simulation.system
 
     @property
     def topology(self):
-        """The OpenMM ``Topology`` (owned by the simulation)."""
+        """The OpenMM ``Topology`` of the current stage's simulation."""
         return self.simulation.topology
 
-    def setup(self) -> None:
-        """Build the starting simulation and report what was set up."""
-        self.output_dir.mkdir(parents=True, exist_ok=True)
+    def run(self) -> None:
+        """Execute every stage, rebuilding a fresh simulation for each."""
+        self.cfg.output_dir.mkdir(parents=True, exist_ok=True)
         self._write_resolved_config()
         self._announce_coordinate_source()
 
-        self.simulation = build_simulation(self.cfg)
+        state = None
+        if self.cfg.system.restart_from is not None:
+            with open(self.cfg.system.restart_from) as f:
+                state = mm.XmlSerializer.deserialize(f.read())
 
-        print(
-            f"System: {self.system.getNumParticles()} particles, "
-            f"{self.system.getNumConstraints()} constraints"
-        )
-        print(
-            f"Platform: {self.simulation.context.getPlatform().getName()} "
-            f"({self.cfg.platform.precision} precision)"
-        )
-
-    def run(self) -> None:
-        """Build the simulation if needed and execute every stage in order."""
-        if self.simulation is None:
-            self.setup()
-        for stage in self.cfg.stages:
-            print(f"\n=== Stage: {stage.name} ({stage.type}) ===")
-            stage.run(self)
-            self._reset_after_stage()
+        self._run_stages(self.cfg.stages, state, self.cfg.output_dir)
         print("\nAll stages complete.")
 
-    def _reset_after_stage(self) -> None:
-        """Clear per-stage bookkeeping so the next stage starts clean."""
-        self.simulation.reporters.clear()
-        self.simulation.currentStep = 0
-        self.simulation.context.setTime(0)
+    def _run_stages(self, stages, state, out_dir) -> None:
+        """Run ``stages`` in order, threading the carried ``State`` between them."""
+        for i, stage in enumerate(stages):
+            if stage.type == "branch":
+                print(f"\n=== Branch: {stage.name} (x{stage.count}) ===")
+                for j in range(stage.count):
+                    self._run_stages(
+                        stages[i + 1:], state, out_dir / f"{stage.name}_{j}"
+                    )
+                return  # a branch consumes the remaining stages
+
+            print(f"\n=== Stage: {stage.name} ({stage.type}) ===")
+            out_dir.mkdir(parents=True, exist_ok=True)
+            self.output_dir = out_dir
+
+            if isinstance(stage, SimulationStage):
+                defaults = merge_defaults(self.cfg.defaults, stage.defaults)
+                self.simulation = stage.build(self.cfg, defaults, state)
+                stage.run(self)
+                state = self.simulation.context.getState(
+                    getPositions=True, getVelocities=True
+                )
+                with open(out_dir / f"{stage.name}.xml", "w") as f:
+                    f.write(mm.XmlSerializer.serialize(state))
+            else:  # non-simulation stage (e.g. analysis): state unchanged
+                self.simulation = None
+                stage.run(self)
 
     def _announce_coordinate_source(self) -> None:
         system = self.cfg.system
@@ -70,7 +81,7 @@ class Runner:
 
     def _write_resolved_config(self) -> None:
         """Dump the fully-resolved config (user inputs + defaults) for the record."""
-        path = self.output_dir / "resolved_config.yaml"
+        path = self.cfg.output_dir / "resolved_config.yaml"
         resolved = self.cfg.model_dump(mode="json")
         header = (
             "# Auto-generated by `openmm-cli run`.\n"

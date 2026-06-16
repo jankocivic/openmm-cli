@@ -84,18 +84,3 @@ Barostat = Annotated[
     IsotropicBarostat | AnisotropicBarostat | MembraneBarostat,
     Field(discriminator="type"),
 ]
-
-
-_BAROSTAT_FORCES = (
-    mm.MonteCarloBarostat,
-    mm.MonteCarloAnisotropicBarostat,
-    mm.MonteCarloMembraneBarostat,
-)
-
-
-def find_barostat(system):
-    """Return the barostat force present in ``system``, or ``None``."""
-    for force in system.getForces():
-        if isinstance(force, _BAROSTAT_FORCES):
-            return force
-    return None

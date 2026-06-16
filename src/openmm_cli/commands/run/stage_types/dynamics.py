@@ -1,63 +1,28 @@
-"""Molecular dynamics stage: integrate the current state for ``steps``.
-
-The thermostat (integrator) and barostat are fixed for the run; this stage only
-optionally overrides the timestep and thermostat temperature, toggles the
-barostat off (NVT for this stage), and randomizes velocities. With no overrides
-it simply continues the current thermodynamic state, so it serves NVE, NVT and
-NPT uniformly. Cross-cutting validity (e.g. ``temperature`` needs a thermostat)
-is enforced in ``config.Config``.
-"""
+"""Molecular dynamics stage: integrate the current state for ``steps``."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
-import openmm as mm
-
 from ..config import Quantity
-from ..reporters import Reporters, build_reporters
-from ..restraints import Restraint, restrain
-from . import StageBase, register_stage
-from ._helpers import configure_barostat
+from ..reporters import build_reporters
+from . import SimulationStage, register_stage
 
 if TYPE_CHECKING:
     from ..runner import Runner
 
 
 @register_stage
-class DynamicsStage(StageBase):
+class DynamicsStage(SimulationStage):
     type: Literal["dynamics"]
     steps: int
-    timestep: Quantity | None = None
-    temperature: Quantity | None = None  # thermostat setpoint override (thermostat only)
-    disable_barostat: bool = False
-    # If set, draw velocities from Maxwell-Boltzmann at this temperature at stage
-    # start (valid for any integrator).
     randomize_velocities: Quantity | None = None
-    restraints: list[Restraint] = []
-    reporters: Reporters = Reporters()
 
     def run(self, runner: "Runner") -> None:
         sim = runner.simulation
-        integrator = sim.integrator
-
-        if self.timestep is not None:
-            integrator.setStepSize(self.timestep)
-        if self.temperature is not None:  # safe: config forbids this under Verlet
-            integrator.setTemperature(self.temperature)
-
-        configure_barostat(sim, runner.system, runner.cfg, self.disable_barostat)
-
         if self.randomize_velocities is not None:
             sim.context.setVelocitiesToTemperature(self.randomize_velocities)
-
         for reporter in build_reporters(self.reporters, self.steps, runner.output_dir):
             sim.reporters.append(reporter)
-
         print(f"  Running {self.steps} steps")
-        with restrain(sim, runner.system, runner.topology, self.restraints):
-            sim.step(self.steps)
-
-        state = sim.context.getState(getPositions=True, getVelocities=True)
-        with open(runner.output_dir / f"{self.name}.xml", "w") as f:
-            f.write(mm.XmlSerializer.serialize(state))
+        sim.step(self.steps)

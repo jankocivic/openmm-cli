@@ -3,7 +3,7 @@
 
 A command-line interface for running molecular dynamics simulations with OpenMM, without writing Python.
  
-`openmm-cli` runs a full simulation workflow (minimization, heating, equilibration, production, and trajectory analysis) from one YAML file. Describe the simulation in the configuration file and the CLI does the rest. The field names are plain (`temperature: 300 K`, `nonbonded_method: PME`, `disable_barostat: true`), which is easier to read than the short keywords used in other MD packages. The YAML file also serves as a record for future reproducibility.
+`openmm-cli` runs a full simulation workflow (minimization, heating, equilibration, production, and trajectory analysis) from one YAML file. Describe the simulation in the configuration file and the CLI does the rest. The field names are plain (`temperature: 300 K`, `nonbonded_method: PME`, `pressure: 1 atm`), which is easier to read than the short keywords used in other MD packages. The YAML file also serves as a record for future reproducibility.
 
 > **Status: project in very early stage.** The tool currently supports AMBER topologies (`.parm7` / `.prmtop`) and OpenMM force field workflows (PDB topology + force field XMLs); other formats (GROMACS, CHARMM, ...) are planned.
 
@@ -196,6 +196,54 @@ Keys under `args` mirror the command's CLI flag names — `--sel` becomes `sel:`
 The analysis command runs with its working directory set to `output_dir`, so trajectory paths and output paths are resolved relative to it. Files outside `output_dir` (typically the input topology) need a relative path back out, which is why `top: ../protein.parm7` in the example.
 
 Analysis stages can be interleaved with dynamics stages, but a common pattern is one or more at the end of the workflow to compute standard observables on the production trajectory.
+
+---
+
+## Branching
+
+A `branch` stage forks the run into independent copies: every stage *after* it runs `count` times, each starting from the state at the branch point, in its own `{name}_{i}` subdirectory. The copies share positions, velocities, and box vectors but evolve independently (each gets its own random seed) — a convenient way to launch replicas.
+
+```yaml
+stages:
+  - { name: equilibrate, type: dynamics, steps: 50000 }
+  - { name: replica,     type: branch,   count: 4 }
+  - { name: production,  type: dynamics, steps: 2500000 }   # runs in replica_0 .. replica_3
+```
+
+A branch consumes the stages that follow it (independent trajectories don't rejoin onto a single state); nest branches to multiply.
+
+---
+
+## Adding a stage type
+
+Stages are auto-discovered from `src/openmm_cli/commands/run/stage_types/` — drop a module there with a `@register_stage`-decorated `StageBase` subclass and nothing else needs to change.
+
+Subclass `SimulationStage` for stages that drive the simulation: the runner builds a fresh simulation for each (run `defaults` + the stage's optional `defaults` override + its `restraints`) and saves the end state, so `run` only advances `runner.simulation`.
+
+Every `SimulationStage` already defines `name` (the stage label, also the saved `{name}.xml`), an optional `defaults` block to override the run-wide integrator/barostat/platform for this stage, `restraints`, and `reporters` — so you only add the fields specific to your stage.
+
+```python
+# src/openmm_cli/commands/run/stage_types/my_stage.py
+from typing import TYPE_CHECKING, Literal
+
+from . import SimulationStage, register_stage
+
+if TYPE_CHECKING:
+    from ..runner import Runner
+
+
+@register_stage
+class MyStage(SimulationStage):
+    type: Literal["my_stage"]   # unique YAML `type:` tag
+    steps: int                  # add any config fields you need
+
+    def run(self, runner: "Runner") -> None:
+        runner.simulation.step(self.steps)
+```
+
+Then use it in a config: `- {name: relax, type: my_stage, steps: 1000}`. A stage that only post-processes outputs (no simulation) subclasses `StageBase` directly instead.
+
+For methods that need to construct the simulation differently — e.g. metadynamics or free-energy setups that add forces before the context, or step via their own helper — override `build(self, cfg, defaults, state)`. By default it builds the standard simulation; override it to assemble a custom one (reusing `system.build_system` / `build_integrator` / `make_platform`).
 
 ---
 

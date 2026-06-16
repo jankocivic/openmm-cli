@@ -1,4 +1,4 @@
-"""Restraint force definitions and application.
+"""Restraint force definitions.
 
 All restraint types live here. Each is a :class:`RestraintBase` subclass that
 carries its own config *and* builds its OpenMM force via ``build()``. To add a
@@ -8,14 +8,13 @@ restraint type:
      and a ``build()`` method, and
   2. add it to the :data:`Restraint` union below.
 
-Stages apply restraints with the :func:`restrain` context manager, which adds
-the forces for the duration of the block and removes them on exit (even if the
-block raises). The runner does not track restraints at all.
+Restraints are added to a stage's freshly-built system at construction time (see
+``system.build_simulation``) and discarded with it, so there is no add/remove
+bookkeeping here -- just the force factories.
 """
 
 from __future__ import annotations
 
-from contextlib import contextmanager
 from typing import Literal
 
 import mdtraj as md
@@ -68,21 +67,3 @@ class PositionalRestraint(RestraintBase):
 #       PositionalRestraint | FlatBottomRestraint, Field(discriminator="type")
 #   ]
 Restraint = PositionalRestraint
-
-
-@contextmanager
-def restrain(simulation, system, topology, restraints):
-    """Apply ``restraints`` for the duration of the block, then remove them."""
-    indices: list[int] = []
-    if restraints:
-        positions = simulation.context.getState(getPositions=True).getPositions()
-        for r in restraints:
-            indices.append(system.addForce(r.build(topology, positions)))
-        simulation.context.reinitialize(preserveState=True)
-    try:
-        yield
-    finally:
-        if indices:
-            for idx in sorted(indices, reverse=True):
-                system.removeForce(idx)
-            simulation.context.reinitialize(preserveState=True)

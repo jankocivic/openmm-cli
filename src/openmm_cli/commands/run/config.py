@@ -189,10 +189,45 @@ from .barostats import Barostat  # noqa: E402
 
 
 class Defaults(_Base):
-    """Thermostat (integrator) and barostat, fixed for the whole run."""
+    """Run-wide simulation-construction settings.
+
+    Each stage builds a fresh simulation from these, and may override any of them
+    with its own partial ``defaults`` block (see :func:`merge_defaults`).
+    """
 
     integrator: IntegratorConfig = IntegratorConfig()
     barostat: Barostat | None = None
+    platform: PlatformConfig = PlatformConfig()
+
+
+def _set_fields(model: BaseModel) -> dict:
+    """The fields the caller explicitly set on ``model`` (for partial merges)."""
+    return {name: getattr(model, name) for name in model.model_fields_set}
+
+
+def merge_defaults(base: Defaults, override: Defaults | None) -> Defaults:
+    """Merge a stage's partial ``defaults`` override onto the run defaults.
+
+    Integrator and platform merge field-wise (explicitly-set fields win, the rest
+    inherit), so "change just the temperature/precision" works. The barostat is
+    whole-replaced -- it is a discriminated union, so a cross-type field merge is
+    meaningless; an explicit ``barostat: null`` turns it off for the stage, while
+    omitting it inherits.
+    """
+    if override is None:
+        return base
+    update: dict = {}
+    if "integrator" in override.model_fields_set:
+        update["integrator"] = base.integrator.model_copy(
+            update=_set_fields(override.integrator)
+        )
+    if "platform" in override.model_fields_set:
+        update["platform"] = base.platform.model_copy(
+            update=_set_fields(override.platform)
+        )
+    if "barostat" in override.model_fields_set:
+        update["barostat"] = override.barostat
+    return base.model_copy(update=update)
 
 
 # ---- Stages ----------------------------------------------------------------
@@ -201,7 +236,7 @@ class Defaults(_Base):
 # package. Importing it here exposes `StageBase` (the field type) and triggers
 # discovery, so every stage type is registered before a Config is validated.
 # Placed after the shared models above, which the stage modules import.
-from .stage_types import StageBase, get_stage_model  # noqa: E402
+from .stage_types import SimulationStage, StageBase, get_stage_model  # noqa: E402
 
 
 # ---- Root ------------------------------------------------------------------
@@ -210,7 +245,6 @@ from .stage_types import StageBase, get_stage_model  # noqa: E402
 class Config(_Base):
     system: SystemSources
     system_settings: SystemSettings = SystemSettings()
-    platform: PlatformConfig = PlatformConfig()
     defaults: Defaults = Defaults()
     output_dir: Path = Path("output")
     # `SerializeAsAny` so the resolved-config dump keeps each concrete stage's
@@ -239,38 +273,36 @@ class Config(_Base):
         return built
 
     @model_validator(mode="after")
-    def _validate_stage_settings(self):
-        """Cross-cutting rules between the fixed run setup and the stages."""
-        thermostatted = self.defaults.integrator.type != "Verlet"
+    def _validate_stages(self):
+        """Validate each simulation stage's *resolved* settings (defaults + override).
+
+        Each stage builds a fresh simulation, so coherence is checked per stage on
+        the merged config rather than once against the run defaults.
+        """
         periodic = self.system_settings.nonbonded_method not in (
             "NoCutoff",
             "CutoffNonPeriodic",
         )
-
-        if self.defaults.barostat is not None:
-            if not thermostatted:
-                raise ValueError(
-                    "A barostat needs a thermostatted integrator (NPT requires a "
-                    f"target temperature), but the integrator is "
-                    f"{self.defaults.integrator.type!r}."
-                )
-            if not periodic:
-                raise ValueError(
-                    "A barostat needs a periodic nonbonded method, but "
-                    f"{self.system_settings.nonbonded_method!r} is non-periodic."
-                )
-
         for stage in self.stages:
-            name = getattr(stage, "name", "?")
-            if getattr(stage, "temperature", None) is not None and not thermostatted:
+            if not isinstance(stage, SimulationStage):
+                continue
+            eff = merge_defaults(self.defaults, stage.defaults)
+            verlet = eff.integrator.type == "Verlet"
+            if eff.barostat is not None:
+                if verlet:
+                    raise ValueError(
+                        f"Stage {stage.name!r}: a barostat needs a thermostatted "
+                        "integrator (NPT needs a target temperature)."
+                    )
+                if not periodic:
+                    raise ValueError(
+                        f"Stage {stage.name!r}: a barostat needs a periodic "
+                        f"nonbonded method (got "
+                        f"{self.system_settings.nonbonded_method!r})."
+                    )
+            if getattr(stage, "requires_thermostat", False) and verlet:
                 raise ValueError(
-                    f"Stage {name!r} sets a temperature, but the run uses the "
-                    "Verlet (NVE) integrator, which has no thermostat. Use a "
-                    "Langevin integrator or remove the temperature."
-                )
-            if getattr(stage, "disable_barostat", False) and self.defaults.barostat is None:
-                raise ValueError(
-                    f"Stage {name!r} sets `disable_barostat`, but no barostat is "
-                    "configured in `defaults.barostat`."
+                    f"Stage {stage.name!r}: heating requires a thermostatted "
+                    "integrator, but the resolved integrator is Verlet (NVE)."
                 )
         return self
