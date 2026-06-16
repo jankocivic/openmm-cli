@@ -39,6 +39,8 @@ _UNIT_TOKENS = {
     # pressure
     "atm": unit.atmospheres,
     "bar": unit.bar,
+    # surface tension (pressure * length, e.g. membrane barostat)
+    "bar*nm": unit.bar * unit.nanometer,
     # inverse time (e.g. Langevin friction)
     "/ps": unit.picoseconds**-1,
     # energy
@@ -180,17 +182,17 @@ class IntegratorConfig(_Base):
     friction: Quantity = 1.0 / unit.picoseconds
 
 
-class BarostatConfig(_Base):
-    type: Literal["MonteCarloBarostat"] = "MonteCarloBarostat"
-    pressure: Quantity = 1 * unit.atmospheres
-    frequency: int = 25
+# Barostat config models (one per type) live in `barostats.py`, alongside the
+# code that builds the OpenMM force. Imported here as the `Defaults.barostat`
+# type; placed after `Quantity` above, which `barostats` imports.
+from .barostats import Barostat  # noqa: E402
 
 
 class Defaults(_Base):
-    """Settings applied to every dynamics stage unless overridden."""
+    """Thermostat (integrator) and barostat, fixed for the whole run."""
 
     integrator: IntegratorConfig = IntegratorConfig()
-    barostat: BarostatConfig | None = None
+    barostat: Barostat | None = None
 
 
 # ---- Stages ----------------------------------------------------------------
@@ -235,3 +237,40 @@ class Config(_Base):
                     f"stages[{i}] must be a mapping with a `type` field"
                 )
         return built
+
+    @model_validator(mode="after")
+    def _validate_stage_settings(self):
+        """Cross-cutting rules between the fixed run setup and the stages."""
+        thermostatted = self.defaults.integrator.type != "Verlet"
+        periodic = self.system_settings.nonbonded_method not in (
+            "NoCutoff",
+            "CutoffNonPeriodic",
+        )
+
+        if self.defaults.barostat is not None:
+            if not thermostatted:
+                raise ValueError(
+                    "A barostat needs a thermostatted integrator (NPT requires a "
+                    f"target temperature), but the integrator is "
+                    f"{self.defaults.integrator.type!r}."
+                )
+            if not periodic:
+                raise ValueError(
+                    "A barostat needs a periodic nonbonded method, but "
+                    f"{self.system_settings.nonbonded_method!r} is non-periodic."
+                )
+
+        for stage in self.stages:
+            name = getattr(stage, "name", "?")
+            if getattr(stage, "temperature", None) is not None and not thermostatted:
+                raise ValueError(
+                    f"Stage {name!r} sets a temperature, but the run uses the "
+                    "Verlet (NVE) integrator, which has no thermostat. Use a "
+                    "Langevin integrator or remove the temperature."
+                )
+            if getattr(stage, "disable_barostat", False) and self.defaults.barostat is None:
+                raise ValueError(
+                    f"Stage {name!r} sets `disable_barostat`, but no barostat is "
+                    "configured in `defaults.barostat`."
+                )
+        return self
