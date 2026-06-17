@@ -32,6 +32,7 @@ git clone https://github.com/jankocivic/openmm-cli.git
 cd openmm-cli
 uv sync
 source .venv/bin/activate # Activate virtual environment, should be done every terminal session
+python -m openmm.testInstallation # Verify if OpenMM is installed properly
 ```
 
 For the optional web dashboard:
@@ -46,7 +47,22 @@ Enable autocompletion of commands:
 openmm-cli --install-completion # Applies only after restarting the terminal
 ```
 
-> **Note:** `openmm-cli` has so far only been tested on Linux via Windows WSL. It should work on macOS, but not verified. In principle, cloning and installing via `pip install -e .` should also work, but not verified.
+### Install with conda
+
+If you prefer conda, create an environment and pip-install the project:
+
+```bash
+conda create -n openmm-cli python=3.12
+conda activate openmm-cli
+git clone https://github.com/jankocivic/openmm-cli.git
+cd openmm-cli
+pip install .
+python -m openmm.testInstallation # Verify if OpenMM is installed properly
+```
+
+Sometimes pip will not install a version of OpenMM with the proper version of CUDA. In that case try to install it from conda-forge with `conda install -c conda-forge openmm cuda-version=12.2` matching the CUDA version from the output of `nvidia-smi`.
+
+> **Note:** `openmm-cli` has so far only been tested on Linux. It should work on macOS, but not verified.
 
 ---
 
