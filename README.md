@@ -5,13 +5,14 @@ A command-line interface for running molecular dynamics simulations with OpenMM,
  
 `openmm-cli` runs a full simulation workflow (minimization, heating, equilibration, production, and trajectory analysis) from one YAML file. Describe the simulation in the configuration file and the CLI does the rest. The field names are plain (`temperature: 300 K`, `nonbonded_method: PME`, `pressure: 1 atm`), which is easier to read than the short keywords used in other MD packages. The YAML file also serves as a record for future reproducibility.
 
-> **Status: project in very early stage.** The tool currently supports AMBER topologies (`.parm7` / `.prmtop`) and OpenMM force field workflows (PDB topology + force field XMLs); other formats (GROMACS, CHARMM, ...) are planned.
+> **Status: project in very early stage.** Report any bug as an issue.
 
 ---
 
 ## Features
 
 - Run a full MD workflow from a single YAML config (minimize → heat → equilibrate → production)
+- AMBER (`.parm7` / `.prmtop`), OpenMM force field (PDB/PDBx topology + force field XMLs), GROMACS (`.top` + `.gro`), and CHARMM (`.psf` + parameter set) inputs
 - Supports restraints
 - Restart from saved states
 - Trajectory analysis and processing commands (RMSD, RMSF, distances, dihedrals, H-bonds, imaging, centering, stripping, format conversion)
@@ -174,7 +175,16 @@ The dashboard reads every CSV in the directory and plots its numeric columns ove
 
 ## Specifying the system
  
-The `system` block supports a few input combinations:
+The input format is chosen from the **topology** file's extension. Each format reads the topology shown plus its companion field(s):
+
+| Topology | Format | Companion field(s) |
+| --- | --- | --- |
+| `.parm7` / `.prmtop` | AMBER | `coordinates` |
+| `.pdb` / `.cif` | OpenMM force field | `forcefield` (the topology file also supplies coordinates) |
+| `.top` | GROMACS | `coordinates`, `include_dir` |
+| `.psf` | CHARMM | `coordinates`, `parameters` |
+
+Examples:
  
 **AMBER topology + AMBER coordinates**:
  
@@ -192,7 +202,7 @@ system:
   coordinates: protein.pdb
 ```
  
-**PDB topology + OpenMM force field** — no AMBER tooling required; the PDB carries the topology, and OpenMM's bundled force field XMLs parametrise it:
+**PDB topology + OpenMM force fields**:
  
 ```yaml
 system:
@@ -202,7 +212,54 @@ system:
     - amber14/tip3pfb.xml
 ```
  
-**Restarting from a previous run** — load positions, velocities, and box vectors from a saved state. Works alongside any topology source above; `coordinates` becomes optional since the state XML provides positions:
+**GROMACS topology + force field files**:
+
+```yaml
+system:
+  topology: system.top
+  coordinates: system.gro
+  include_dir: /usr/local/gromacs/share/gromacs/top   # directory holding the force-field include files
+```
+
+**CHARMM topology + parameter set** — the box is read from the PDB's `CRYST1` record:
+
+```yaml
+system:
+  topology: system.psf
+  coordinates: system.pdb
+  parameters:
+    - top_all36_prot.rtf
+    - par_all36_prot.prm
+    - toppar_water_ions.str
+```
+
+### Coordinates and the periodic box
+
+`coordinates` may be any supported coordinate file — `.inpcrd`/`.rst7`, `.gro`, `.pdb`/`.cif`, or CHARMM `.crd` — independent of the topology format, as long as the atom ordering matches. The system is always built from the topology file; the coordinate file only supplies the positions and, when it carries one, the periodic box.
+
+The box used to build the system is resolved in this order:
+
+1. an explicit `box:` block (override);
+2. the box found in the coordinate file (`inpcrd` / `gro` / PDB `CRYST1`);
+3. the box carried in a `restart_from` (or previous-stage) state.
+
+On restart the saved state's box is also reapplied to the context afterwards, so it is always the box the run actually continues with. (AMBER additionally falls back to the box stored in the prmtop, and `restart_box` covers GROMACS and CHARMM, whose topology files carry no box.)
+
+You only need to give a `box:` explicitly when none of those provide one — e.g. a bare CHARMM `.crd` for a periodic system with no restart. Lengths take units; the angles are degrees and default to 90 (orthorhombic):
+
+```yaml
+system:
+  topology: system.psf
+  coordinates: system.crd
+  parameters:
+    - par_all36_prot.prm
+  box:
+    a: 6.0 nm
+    b: 6.0 nm
+    c: 6.0 nm
+```
+
+**Restarting from a previous run** — load positions, velocities, and box vectors from a saved state. Works with any topology format above; `coordinates` becomes optional since the state supplies positions, velocities, and the box:
  
 ```yaml
 system:
