@@ -66,19 +66,21 @@ Enable autocompletion of commands:
 openmm-cli --install-completion # Applies only after restarting the terminal
 ```
 
-If the CUDA version pip installs doesn't match your GPU driver (check the max in `nvidia-smi`), install the dependencies from conda-forge instead, pinning the CUDA version, then add the package with `--no-deps`:
+### If OpenMM can't be installed from PyPI
+
+If `uv` or `pip` can't find a working OpenMM (e.g. no compatible wheel, or the CUDA version doesn't match your GPU driver — check with `nvidia-smi`), install everything from conda-forge, pinning the CUDA version, and add the package with `--no-deps`:
 
 ```bash
 git clone https://github.com/jankocivic/openmm-cli.git
 cd openmm-cli
 conda create -n openmm-cli -c conda-forge \
-    python=3.12 openmm mdtraj pdbfixer numpy pydantic pyyaml typer matplotlib cuda-version=12.2
+    python=3.12 openmm mdtraj pdbfixer numpy pydantic pyyaml typer matplotlib cuda-version=12.4
 conda activate openmm-cli
 python -m openmm.testInstallation # Verify if OpenMM is installed properly
 pip install . --no-deps
 ```
 
-For the dashboard on this path, also add its dependencies to the conda env: `streamlit plotly pandas`.
+For the dashboard on this path, also add `streamlit plotly pandas` to the conda env. `--no-deps` stops pip from re-resolving the dependencies and pulling mismatched copies from PyPI.
 
 > **Note:** `openmm-cli` has so far only been tested on Linux. It should work on macOS, but not verified.
 
