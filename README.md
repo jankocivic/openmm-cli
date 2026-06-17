@@ -49,18 +49,25 @@ openmm-cli --install-completion # Applies only after restarting the terminal
 
 ### Install with conda
 
-If you prefer conda, create an environment and pip-install the project:
+Create a conda environment and install with pip (add `[dashboard]` for the optional web dashboard):
 
 ```bash
 conda create -n openmm-cli python=3.12
 conda activate openmm-cli
-git clone https://github.com/jankocivic/openmm-cli.git
-cd openmm-cli
-pip install .
+pip install .              # or: pip install ".[dashboard]"
 python -m openmm.testInstallation # Verify if OpenMM is installed properly
 ```
 
-Sometimes pip will not install a version of OpenMM with the proper version of CUDA. In that case try to install it from conda-forge with `conda install -c conda-forge openmm cuda-version=12.2` matching the CUDA version from the output of `nvidia-smi`.
+If the CUDA version pip installs doesn't match your GPU driver (check the max in `nvidia-smi`), install the dependencies from conda-forge instead, pinning the CUDA version, then add the package with `--no-deps`:
+
+```bash
+conda create -n openmm-cli -c conda-forge \
+    python=3.12 openmm mdtraj pdbfixer numpy pydantic pyyaml typer matplotlib cuda-version=12.2
+conda activate openmm-cli
+pip install . --no-deps
+```
+
+For the dashboard on this path, also add its dependencies to the conda env: `streamlit plotly pandas`.
 
 > **Note:** `openmm-cli` has so far only been tested on Linux. It should work on macOS, but not verified.
 
