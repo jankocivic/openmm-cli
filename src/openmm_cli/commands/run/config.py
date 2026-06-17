@@ -48,6 +48,7 @@ _UNIT_TOKENS = {
     "kcal/mol": unit.kilocalories_per_mole,
     # force / force constants
     "kJ/mol/nm": unit.kilojoules_per_mole / unit.nanometer,
+    "kcal/mol/A": unit.kilocalories_per_mole / unit.angstrom,
     "kJ/mol/nm^2": unit.kilojoules_per_mole / unit.nanometer**2,
     "kJ/mol/nm**2": unit.kilojoules_per_mole / unit.nanometer**2,
     "kcal/mol/A^2": unit.kilocalories_per_mole / unit.angstrom**2,
