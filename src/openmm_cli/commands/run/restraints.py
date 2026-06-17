@@ -17,12 +17,12 @@ from __future__ import annotations
 
 from typing import Literal
 
-import mdtraj as md
 import openmm as mm
 from openmm import unit
 from pydantic import BaseModel, ConfigDict
 
 from .config import Quantity
+from .selections import select_atoms
 
 
 class RestraintBase(BaseModel):
@@ -36,13 +36,6 @@ class RestraintBase(BaseModel):
         raise NotImplementedError
 
 
-def _select_atoms(topology, selection: str) -> list[int]:
-    indices = md.Topology.from_openmm(topology).select(selection)
-    if len(indices) == 0:
-        raise ValueError(f"Selection {selection!r} matched no atoms")
-    return [int(i) for i in indices]
-
-
 class PositionalRestraint(RestraintBase):
     type: Literal["positional"] = "positional"
     selection: str  # mdtraj-style, e.g. "not water and not element H"
@@ -54,7 +47,7 @@ class PositionalRestraint(RestraintBase):
         force.addPerParticleParameter("x0")
         force.addPerParticleParameter("y0")
         force.addPerParticleParameter("z0")
-        for i in _select_atoms(topology, self.selection):
+        for i in select_atoms(topology, self.selection):
             p = positions[i].value_in_unit(unit.nanometer)
             force.addParticle(i, [p[0], p[1], p[2]])
         return force

@@ -22,7 +22,9 @@ class DynamicsStage(SimulationStage):
         sim = runner.simulation
         if self.randomize_velocities is not None:
             sim.context.setVelocitiesToTemperature(self.randomize_velocities)
-        for reporter in build_reporters(self.reporters, self.steps, runner.output_dir):
+        for reporter in build_reporters(
+            self.reporters, self.steps, runner.output_dir, runner.topology
+        ):
             sim.reporters.append(reporter)
         print(f"  Running {self.steps} steps")
         sim.step(self.steps)
