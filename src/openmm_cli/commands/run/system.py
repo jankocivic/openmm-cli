@@ -1,83 +1,16 @@
-"""Construction of the OpenMM system, integrator and platform from config."""
+"""Construction of the OpenMM integrator, platform and simulation from config.
+
+The ``System`` itself (topology, positions, box) is produced by the configured
+system source -- see ``sources.py``. This module assembles the integrator and
+platform from the resolved defaults and seeds the simulation context.
+"""
 
 from __future__ import annotations
-
-from dataclasses import dataclass
 
 import openmm as mm
 from openmm import app
 
 from .config import Config, Defaults, IntegratorConfig, PlatformConfig
-
-
-@dataclass
-class BuiltSystem:
-    """The OpenMM objects produced from the configured system sources.
-
-    ``positions`` and ``box_vectors`` may be ``None`` when a restart file is
-    expected to supply them.
-    """
-
-    topology: app.Topology
-    positions: object | None
-    box_vectors: object | None
-    system: mm.System
-
-
-def _create_system_kwargs(cfg: Config) -> dict:
-    """Shared keyword arguments for ``createSystem``."""
-    ss = cfg.system_settings
-    kwargs = {
-        "nonbondedMethod": getattr(app, ss.nonbonded_method),
-        "rigidWater": ss.rigid_water,
-    }
-    if ss.nonbonded_method != "NoCutoff":
-        kwargs["nonbondedCutoff"] = ss.nonbonded_cutoff
-    if ss.constraints is not None:
-        kwargs["constraints"] = getattr(app, ss.constraints)
-    if ss.hydrogen_mass is not None:
-        kwargs["hydrogenMass"] = ss.hydrogen_mass
-    return kwargs
-
-
-def _build_amber_system(cfg: Config, kwargs: dict) -> BuiltSystem:
-    prmtop = app.AmberPrmtopFile(str(cfg.system.topology))
-    system = prmtop.createSystem(**kwargs)
-
-    if cfg.system.coordinates is None:
-        # A restart file will provide positions and box vectors.
-        return BuiltSystem(prmtop.topology, None, None, system)
-
-    if cfg.system.coordinates.suffix.lower() == ".pdb":
-        coords = app.PDBFile(str(cfg.system.coordinates))
-    else:
-        coords = app.AmberInpcrdFile(str(cfg.system.coordinates))
-    box = (
-        getattr(coords, "boxVectors", None)
-        or coords.topology.getPeriodicBoxVectors()
-    )
-    return BuiltSystem(prmtop.topology, coords.positions, box, system)
-
-
-def _build_pdb_system(cfg: Config, kwargs: dict) -> BuiltSystem:
-    pdb = app.PDBFile(str(cfg.system.topology))
-    forcefield = app.ForceField(*cfg.system.forcefield)
-    system = forcefield.createSystem(pdb.topology, **kwargs)
-    return BuiltSystem(
-        pdb.topology,
-        pdb.positions,
-        pdb.topology.getPeriodicBoxVectors(),
-        system,
-    )
-
-
-def build_system(cfg: Config) -> BuiltSystem:
-    """Build the OpenMM system from the configured topology/coordinates."""
-    kwargs = _create_system_kwargs(cfg)
-    suffix = cfg.system.topology.suffix.lower()
-    if suffix in (".parm7", ".prmtop"):
-        return _build_amber_system(cfg, kwargs)
-    return _build_pdb_system(cfg, kwargs)
 
 
 _INTEGRATORS = {
@@ -124,7 +57,10 @@ def build_simulation(
     velocities / box) or, for the first stage, from the input files. Free of side
     effects apart from reading the input files.
     """
-    built = build_system(cfg)
+    # A restart/previous-stage state carries the box, so the source can build with
+    # it when no coordinates or explicit box is given (it's reapplied below anyway).
+    restart_box = state.getPeriodicBoxVectors() if state is not None else None
+    built = cfg.system.build(cfg.system_settings, restart_box=restart_box)
     if defaults.barostat is not None:
         built.system.addForce(
             defaults.barostat.build(defaults.integrator.temperature)

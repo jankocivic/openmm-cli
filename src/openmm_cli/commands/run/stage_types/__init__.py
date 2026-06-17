@@ -56,7 +56,7 @@ class SimulationStage(StageBase):
         resolved ``defaults``. Override this for methods that assemble the
         simulation differently (e.g. metadynamics or alchemical free energy, which
         add forces before the context and may step via their own helper object);
-        compose ``system.build_system`` / ``build_integrator`` / ``make_platform``
+        compose ``cfg.system.build`` / ``build_integrator`` / ``make_platform``
         as needed.
         """
         # Local import avoids a config <-> system import cycle at module load.

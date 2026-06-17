@@ -120,36 +120,10 @@ class _Base(BaseModel):
 
 # ---- System ----------------------------------------------------------------
 
-
-class SystemSources(_Base):
-    """What we're simulating.
-
-    Supported combinations:
-      - AMBER topology (.parm7/.prmtop) + coordinates (.inpcrd or .pdb), or restart_from
-      - OpenMM PDB topology (.pdb) + forcefield XML list
-    """
-
-    topology: Path
-    coordinates: Path | None = None
-    restart_from: Path | None = None
-    forcefield: list[str] | None = (
-        None  # e.g. ["amber14-all.xml", "amber14/tip3pfb.xml"]
-    )
-
-    @model_validator(mode="after")
-    def _validate_inputs(self):
-        suffix = self.topology.suffix.lower()
-        if suffix in (".parm7", ".prmtop"):
-            if self.coordinates is None and self.restart_from is None:
-                raise ValueError(
-                    "AMBER topology requires `coordinates` or `restart_from`"
-                )
-        elif suffix == ".pdb":
-            if self.forcefield is None:
-                raise ValueError("PDB topology requires a `forcefield` list")
-        else:
-            raise ValueError(f"Unsupported topology format: {suffix}")
-        return self
+# The system-source models (one per input format) live in `sources.py`,
+# alongside the code that builds the OpenMM System. The concrete model is
+# chosen from the topology extension; imported below, after `SystemSettings`
+# (which `sources` needs) is defined.
 
 
 class SystemSettings(_Base):
@@ -187,6 +161,10 @@ class IntegratorConfig(_Base):
 # code that builds the OpenMM force. Imported here as the `Defaults.barostat`
 # type; placed after `Quantity` above, which `barostats` imports.
 from .barostats import Barostat  # noqa: E402
+
+# System-source models, dispatched by topology extension. Placed after
+# `SystemSettings`, which `sources` imports.
+from .sources import SOURCE_BY_SUFFIX, SourceBase  # noqa: E402
 
 
 class Defaults(_Base):
@@ -244,13 +222,30 @@ from .stage_types import SimulationStage, StageBase, get_stage_model  # noqa: E4
 
 
 class Config(_Base):
-    system: SystemSources
+    # `SerializeAsAny` so the resolved-config dump keeps each concrete source's
+    # and stage's own fields rather than only those declared on the base.
+    system: SerializeAsAny[SourceBase]
     system_settings: SystemSettings = SystemSettings()
     defaults: Defaults = Defaults()
     output_dir: Path = Path("output")
-    # `SerializeAsAny` so the resolved-config dump keeps each concrete stage's
-    # own fields rather than only those declared on StageBase.
     stages: list[SerializeAsAny[StageBase]]
+
+    @field_validator("system", mode="before")
+    @classmethod
+    def _dispatch_source(cls, raw):
+        """Pick the system-source model from the topology file's extension."""
+        if isinstance(raw, SourceBase):
+            return raw
+        if not isinstance(raw, dict) or "topology" not in raw:
+            raise ValueError("`system` must be a mapping with a `topology` field")
+        suffix = Path(str(raw["topology"])).suffix.lower()
+        model = SOURCE_BY_SUFFIX.get(suffix)
+        if model is None:
+            known = ", ".join(sorted(SOURCE_BY_SUFFIX))
+            raise ValueError(
+                f"Unsupported topology format {suffix!r}. Known: {known}"
+            )
+        return model.model_validate(raw)
 
     @field_validator("stages", mode="before")
     @classmethod
