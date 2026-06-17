@@ -105,9 +105,11 @@ def make_platform(platform: PlatformConfig) -> tuple[mm.Platform, dict[str, str]
     plat = mm.Platform.getPlatformByName(platform.name)
     props: dict[str, str] = {}
     if platform.name in ("CUDA", "OpenCL"):
-        props[f"{platform.name}Precision"] = platform.precision
+        # CUDA and OpenCL both use the bare property names "Precision" and
+        # "DeviceIndex" (not a platform-prefixed form).
+        props["Precision"] = platform.precision
         if platform.device_index is not None:
-            props[f"{platform.name}DeviceIndex"] = platform.device_index
+            props["DeviceIndex"] = platform.device_index
     return plat, props
 
 
