@@ -15,6 +15,7 @@ from mdtraj.reporters import HDF5Reporter, NetCDFReporter
 from openmm import app
 
 from .config import _Base
+from .selections import select_atoms
 
 
 class TrajectoryReporter(_Base):
@@ -24,6 +25,9 @@ class TrajectoryReporter(_Base):
         Literal["dcd", "xtc", "pdb", "pdbx", "hdf5", "h5", "netcdf", "nc"] | None
     ) = None
     # If None, format is inferred from the file extension.
+    selection: str | None = None
+    # mdtraj selection string (e.g. "protein"); writes only those atoms. Only
+    # the mdtraj-backed formats below support this.
 
 
 class ReporterFile(_Base):
@@ -49,8 +53,11 @@ _TRAJECTORY_REPORTERS = {
     "nc": NetCDFReporter,
 }
 
+# Formats whose (mdtraj-backed) reporters accept an ``atomSubset`` argument.
+_SELECTION_FORMATS = {"dcd", "hdf5", "h5", "netcdf", "nc"}
 
-def _make_trajectory_reporter(cfg, output_dir: Path):
+
+def _make_trajectory_reporter(cfg, output_dir: Path, topology):
     """Build the reporter for the requested trajectory format."""
     path = output_dir / cfg.file
     fmt = (cfg.format or path.suffix.lstrip(".")).lower()
@@ -61,7 +68,15 @@ def _make_trajectory_reporter(cfg, output_dir: Path):
             f"Unknown trajectory format {fmt!r} for file {cfg.file}. "
             f"Supported: {', '.join(sorted(_TRAJECTORY_REPORTERS))}."
         )
-    return reporter_cls(str(path), cfg.interval)
+    if cfg.selection is None:
+        return reporter_cls(str(path), cfg.interval)
+    if fmt not in _SELECTION_FORMATS:
+        raise ValueError(
+            f"Trajectory format {fmt!r} does not support atom selection. "
+            f"Use one of: {', '.join(sorted(_SELECTION_FORMATS))}."
+        )
+    atom_subset = select_atoms(topology, cfg.selection, label="Trajectory selection")
+    return reporter_cls(str(path), cfg.interval, atomSubset=atom_subset)
 
 
 def _make_state_reporter(cfg, output_dir: Path):
@@ -94,11 +109,15 @@ def _make_progress_reporter(stage_steps: int):
     )
 
 
-def build_reporters(reporters_cfg: Reporters, stage_steps: int, output_dir: Path) -> list:
+def build_reporters(
+    reporters_cfg: Reporters, stage_steps: int, output_dir: Path, topology
+) -> list:
     """Build the reporters for a stage (file outputs + console progress)."""
     out = []
     if reporters_cfg.trajectory:
-        out.append(_make_trajectory_reporter(reporters_cfg.trajectory, output_dir))
+        out.append(
+            _make_trajectory_reporter(reporters_cfg.trajectory, output_dir, topology)
+        )
     if reporters_cfg.state:
         out.append(_make_state_reporter(reporters_cfg.state, output_dir))
     if reporters_cfg.checkpoint:

@@ -269,6 +269,32 @@ system:
  
 ---
 
+## Reporters
+
+A `dynamics`, `heat`, or `ramd` stage can attach reporters that write output. Three kinds, all optional, each taking a `file` (resolved under `output_dir`) and an `interval` in steps:
+
+```yaml
+reporters:
+  trajectory: { file: prod.dcd, interval: 5000 }
+  state:      { file: prod.csv, interval: 1000 }
+  checkpoint: { file: prod.chk, interval: 50000 }
+```
+
+- **trajectory** — coordinates over time. Format is inferred from the file extension, or set `format:` explicitly: `dcd`, `xtc`, `pdb`, `pdbx`, `hdf5`/`h5`, `netcdf`/`nc`.
+- **state** — CSV of step, time, potential/kinetic/total energy, temperature, volume, density, and speed.
+- **checkpoint** — binary checkpoint for restarting.
+
+A console progress reporter (~20 updates per stage) is always added automatically; it needs no configuration.
+
+**Writing a subset of atoms** — give the trajectory reporter an mdtraj `selection` to store only those atoms (smaller files). Supported only for the mdtraj-backed formats `dcd`, `hdf5`/`h5`, and `netcdf`/`nc`; using it with `pdb`, `pdbx`, or `xtc` is an error.
+
+```yaml
+reporters:
+  trajectory: { file: prod.dcd, interval: 5000, selection: "protein" }
+```
+
+---
+
 ## Analysis stages
 
 A stage with `type: analysis` runs one of the `trajectory` commands, using the same arguments and options that command accepts on the CLI:
@@ -304,6 +330,28 @@ stages:
 ```
 
 A branch consumes the stages that follow it (independent trajectories don't rejoin onto a single state); nest branches to multiply.
+
+---
+
+## RAMD stage
+
+A `ramd` stage runs Random Acceleration Molecular Dynamics: a constant force of fixed `magnitude` is applied to the ligand's center of mass in a random direction, re-randomized whenever the ligand stalls, until it leaves the binding site — useful for probing ligand egress routes.
+
+```yaml
+- name: unbind
+  type: ramd
+  ligand: "resname LIG"        # mdtraj selection; its COM is pushed
+  receptor: "protein"          # optional; COM used for the exit distance
+  magnitude: 14 kcal/mol/angstrom
+  ramd_steps: 50               # MD steps between stall checks
+  r_min: 0.025 angstrom        # min COM advance per check, else reorient
+  r_max: 30 angstrom           # stop once ligand–receptor COM distance exceeds this
+  max_steps: 1000000           # hard step cap
+  reporters:
+    trajectory: { file: ramd.dcd, interval: 5000 }
+```
+
+Only `ligand` is required; the other fields show their defaults. Reporters behave as in any dynamics stage.
 
 ---
 

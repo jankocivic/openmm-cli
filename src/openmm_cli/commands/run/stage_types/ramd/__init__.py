@@ -14,11 +14,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
-import mdtraj as md
 from openmm import unit
 
 from ...config import Quantity
 from ...reporters import build_reporters
+from ...selections import select_atoms
 from .. import SimulationStage, register_stage
 from .engine import RAMD
 
@@ -27,10 +27,7 @@ if TYPE_CHECKING:
 
 
 def _select(topology, selection: str) -> list[int]:
-    indices = md.Topology.from_openmm(topology).select(selection)
-    if len(indices) == 0:
-        raise ValueError(f"RAMD selection {selection!r} matched no atoms")
-    return [int(i) for i in indices]
+    return select_atoms(topology, selection, label="RAMD selection")
 
 
 @register_stage
@@ -50,7 +47,9 @@ class RAMDStage(SimulationStage):
         ligand = _select(runner.topology, self.ligand)
         receptor = _select(runner.topology, self.receptor) if self.receptor else None
 
-        for reporter in build_reporters(self.reporters, self.max_steps, runner.output_dir):
+        for reporter in build_reporters(
+            self.reporters, self.max_steps, runner.output_dir, runner.topology
+        ):
             sim.reporters.append(reporter)
 
         # RAMD logs only to its file; the console shows the standard progress
