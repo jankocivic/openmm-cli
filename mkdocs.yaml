@@ -11,6 +11,9 @@ plugins:
   - search
   - mkdocs-typer2
 
+markdown_extensions:
+  - admonition
+
 nav:
   - Home: index.md
   - Configuration:

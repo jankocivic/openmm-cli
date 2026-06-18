@@ -231,10 +231,41 @@ class GromacsSource(SourceBase):
 
 
 class CharmmSource(SourceBase):
-    """CHARMM psf (+ pdb/crd coordinates) with an explicit parameter set."""
+    """CHARMM psf (+ pdb/crd coordinates) with a parameter set.
+
+    Parameters come from an explicit ``parameters`` list and/or a CHARMM-GUI
+    ``toppar`` stream file. ``toppar`` must be the *OpenMM* ``toppar.str`` -- the
+    one in CHARMM-GUI's generated ``openmm/`` folder that ``openmm_run.py -t``
+    consumes, a plain list of file paths (one per line). It is **not** the
+    ``toppar.str`` at the job root, which is a CHARMM script and will not parse.
+    Paths in the manifest are resolved relative to the manifest file, and only
+    ``rtf``/``prm``/``str`` entries are kept (so a listed ``.crd`` is skipped),
+    matching CHARMM-GUI's ``read_params``.
+    """
 
     suffixes: ClassVar[tuple[str, ...]] = (".psf",)
-    parameters: list[Path]  # rtf/prm/str/... fed to CharmmParameterSet
+    parameters: list[Path] = []   # rtf/prm/str files for CharmmParameterSet
+    toppar: Path | None = None    # CHARMM-GUI toppar stream file (a manifest of paths)
+
+    @model_validator(mode="after")
+    def _need_parameters(self):
+        if not self.parameters and self.toppar is None:
+            raise ValueError("CHARMM source needs `parameters` and/or `toppar`")
+        return self
+
+    def _parameter_files(self) -> list[str]:
+        """Explicit ``parameters`` plus the files listed in a CHARMM-GUI ``toppar``."""
+        files = [str(p) for p in self.parameters]
+        if self.toppar is not None:
+            base = self.toppar.parent
+            for line in self.toppar.read_text().splitlines():
+                entry = line.split("!", 1)[0].strip()  # drop CHARMM `!` comments
+                if not entry:
+                    continue
+                if entry.rsplit(".", 1)[-1].lower() not in ("rtf", "prm", "str"):
+                    continue  # skip non-parameter entries (e.g. .crd), like CHARMM-GUI
+                files.append(str((base / entry).resolve()))
+        return files
 
     def build(self, settings: SystemSettings, restart_box=None) -> BuiltSystem:
         positions, box = self._coords_and_box(restart_box)
@@ -245,7 +276,7 @@ class CharmmSource(SourceBase):
             )
         # CharmmPsfFile takes the box at construction, just like AMBER/GROMACS.
         psf = app.CharmmPsfFile(str(self.topology), periodicBoxVectors=box)
-        params = app.CharmmParameterSet(*[str(p) for p in self.parameters])
+        params = app.CharmmParameterSet(*self._parameter_files())
         system = psf.createSystem(params, **_system_kwargs(settings))
         return BuiltSystem(psf.topology, positions, box, system)
 

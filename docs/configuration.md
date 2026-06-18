@@ -34,7 +34,7 @@ Each format then adds one field:
 | `.parm7` / `.prmtop` | AMBER | — (the prmtop is self-contained) |
 | `.pdb` / `.cif` | OpenMM force field | `forcefield` — list of force-field XMLs |
 | `.top` | GROMACS | `include_dir` — directory of the force-field `.itp` files |
-| `.psf` | CHARMM | `parameters` — list of `rtf`/`prm`/`str` files |
+| `.psf` | CHARMM | `parameters` (`rtf`/`prm`/`str` files) and/or `toppar` (a CHARMM-GUI **OpenMM** `toppar.str`) |
 
 The `box` block is edge lengths plus optional angles (degrees, default 90):
 
@@ -79,11 +79,22 @@ system:
 system:
   topology: system.psf
   coordinates: system.pdb
-  parameters: [top_all36_prot.rtf, par_all36_prot.prm, toppar_water_ions.str]
+  parameters: [charmm22.rtf, charmm22.prm]
+
+# CHARMM via a CHARMM-GUI toppar manifest instead of listing files
+system:
+  topology: step3_input.psf
+  coordinates: step3_input.pdb
+  toppar: openmm/toppar.str        # the toppar.str inside the openmm/ folder
 
 # Restart: any format; coordinates optional (the state provides positions + box)
 system: { topology: protein.parm7, restart_from: previous_run/production.xml }
 ```
+
+For CHARMM, `toppar` points at the CHARMM-GUI **OpenMM** toppar stream file — the `toppar.str` inside the generated `openmm/` folder, the one its `openmm_run.py -t toppar.str` consumes. It is a plain list of parameter-file paths, one per line (e.g. `../toppar/par_all36m_prot.prm`). Each path is resolved relative to the `toppar.str` itself, and only `rtf`/`prm`/`str` entries are loaded — so a `.crd` line is ignored, matching CHARMM-GUI. Use `parameters`, `toppar`, or both (explicit files load first).
+
+!!! warning "Use the OpenMM `toppar.str`, not the CHARMM one"
+    CHARMM-GUI also writes a `toppar.str` at the job root for use with CHARMM itself. That file is a CHARMM script (`open read ... name ...`, `stream ...`), **not** a list of paths, and will not load here. The correct file lives in the `openmm/` subdirectory and its lines look like `../toppar/top_all36_prot.rtf`.
 
 ---
 
