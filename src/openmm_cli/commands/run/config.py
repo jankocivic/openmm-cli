@@ -130,12 +130,15 @@ class SystemSettings(_Base):
     """How forces are computed -- args to prmtop.createSystem()."""
 
     nonbonded_method: Literal[
-        "NoCutoff", "CutoffNonPeriodic", "CutoffPeriodic", "Ewald", "PME"
+        "NoCutoff", "CutoffNonPeriodic", "CutoffPeriodic", "Ewald", "PME", "LJPME"
     ] = "PME"
     nonbonded_cutoff: Quantity = 1.0 * unit.nanometers
     constraints: Literal["HBonds", "AllBonds", "HAngles"] | None = "HBonds"
     rigid_water: bool = True
     hydrogen_mass: Quantity | None = None
+    ewald_error_tolerance: float = 0.0005
+    switch_distance: Quantity | None = None  # None = no LJ switching (OpenMM default)
+    remove_cm_motion: bool = True
 
 
 # ---- Platform --------------------------------------------------------------

@@ -98,11 +98,14 @@ The arguments passed to `createSystem` — how non-bonded forces and constraints
 
 | Field | Type | Default | Meaning |
 | --- | --- | --- | --- |
-| `nonbonded_method` | `NoCutoff`, `CutoffNonPeriodic`, `CutoffPeriodic`, `Ewald`, `PME` | `PME` | The non-bonded method. `PME`/`Ewald`/`CutoffPeriodic` are periodic and require a box. |
+| `nonbonded_method` | `NoCutoff`, `CutoffNonPeriodic`, `CutoffPeriodic`, `Ewald`, `PME`, `LJPME` | `PME` | The non-bonded method. `PME`/`Ewald`/`LJPME`/`CutoffPeriodic` are periodic and require a box. |
 | `nonbonded_cutoff` | quantity | `1.0 nm` | Real-space cutoff (ignored for `NoCutoff`). |
 | `constraints` | `HBonds`, `AllBonds`, `HAngles`, or null | `HBonds` | Which bonds/angles are constrained. |
 | `rigid_water` | bool | `true` | Keep water rigid regardless of `constraints`. |
 | `hydrogen_mass` | quantity | none | Hydrogen-mass repartitioning target (enables larger timesteps). |
+| `ewald_error_tolerance` | float | `0.0005` | Error tolerance for `Ewald`/`PME`/`LJPME` (ignored otherwise). |
+| `switch_distance` | quantity | none | Distance at which the LJ switching function turns on. None = no switching. Must be < `nonbonded_cutoff`. |
+| `remove_cm_motion` | bool | `true` | Add a center-of-mass motion remover. |
 
 ---
 

@@ -61,14 +61,14 @@ stages:
     type: dynamics
     steps: 10000                      # 20 ps
     reporters:
-      trajectory: { file: prod.pdb, interval: 500 }   # save every 1 ps
+      trajectory: { file: prod.dcd, interval: 500 }   # save every 1 ps
       state:      { file: prod.csv, interval: 250 }
 
   - name: rmsd
     type: analysis
     command: rmsd
     args:
-      trajectory: prod.pdb
+      trajectory: prod.dcd
       top: ../solvated.pdb
       sel: "protein and name CA"
       out: rmsd.csv
@@ -77,7 +77,7 @@ stages:
     type: analysis
     command: hbonds
     args:
-      trajectory: prod.pdb
+      trajectory: prod.dcd
       top: ../solvated.pdb
       sel: "protein"
       freq: 0.5

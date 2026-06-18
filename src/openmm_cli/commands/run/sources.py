@@ -97,6 +97,8 @@ def _system_kwargs(s: SystemSettings) -> dict:
     kw = {
         "nonbondedMethod": getattr(app, s.nonbonded_method),
         "rigidWater": s.rigid_water,
+        "ewaldErrorTolerance": s.ewald_error_tolerance,
+        "removeCMMotion": s.remove_cm_motion,
     }
     if s.nonbonded_method != "NoCutoff":
         kw["nonbondedCutoff"] = s.nonbonded_cutoff
@@ -104,6 +106,8 @@ def _system_kwargs(s: SystemSettings) -> dict:
         kw["constraints"] = getattr(app, s.constraints)
     if s.hydrogen_mass is not None:
         kw["hydrogenMass"] = s.hydrogen_mass
+    if s.switch_distance is not None:
+        kw["switchDistance"] = s.switch_distance
     return kw
 
 
