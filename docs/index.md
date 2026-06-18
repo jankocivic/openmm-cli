@@ -12,7 +12,7 @@ A command-line interface for running molecular dynamics simulations with OpenMM,
 ## Features
 
 - Run a full MD workflow from a single YAML config (minimize → heat → equilibrate → production)
-- AMBER (`.parm7` / `.prmtop`), OpenMM force field (PDB/PDBx topology + force field XMLs), GROMACS (`.top` + `.gro`), and CHARMM (`.psf` + parameter set) inputs
+- AMBER (`.parm7` / `.prmtop`) and OpenMM force field (PDB/PDBx topology + force field XMLs) inputs, plus experimental, not-yet-thoroughly-verified GROMACS (`.top` + `.gro`) and CHARMM (`.psf` + parameter set) support
 - Supports restraints
 - Restart from saved states
 - Trajectory analysis and processing commands (RMSD, RMSF, distances, dihedrals, H-bonds, imaging, centering, stripping, format conversion)
