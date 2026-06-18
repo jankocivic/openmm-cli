@@ -5,7 +5,6 @@ description = "Command line interface for running OpenMM simulations"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "matplotlib>=3.10.8",
     "mdtraj>=1.11.1.post1",
     "numpy>=2.4.2",
     "openmm[cuda12]>=8.5",

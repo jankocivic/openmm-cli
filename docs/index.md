@@ -69,7 +69,7 @@ If `uv` or `pip` can't find a working OpenMM (e.g. no compatible wheel, or the C
 git clone https://github.com/jankocivic/openmm-cli.git
 cd openmm-cli
 conda create -n openmm-cli -c conda-forge \
-    python=3.12 openmm mdtraj pdbfixer numpy pydantic pyyaml typer matplotlib cuda-version=12.4
+    python=3.12 openmm mdtraj pdbfixer numpy pydantic pyyaml typer cuda-version=12.4
 conda activate openmm-cli
 python -m openmm.testInstallation # Verify if OpenMM is installed properly
 pip install . --no-deps
