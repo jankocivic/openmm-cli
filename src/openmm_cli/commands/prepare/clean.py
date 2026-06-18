@@ -4,8 +4,6 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
-from openmm.app import PDBFile
-from pdbfixer import PDBFixer
 
 
 def command(
@@ -46,6 +44,9 @@ def command(
     ] = True,
 ) -> None:
     """Clean a PDB file with pdbfixer: fix structure, add hydrogens, optionally strip extras."""
+    from openmm.app import PDBFile
+    from pdbfixer import PDBFixer
+
     print(f"Loading {pdb}")
     fixer = PDBFixer(filename=str(pdb))
 

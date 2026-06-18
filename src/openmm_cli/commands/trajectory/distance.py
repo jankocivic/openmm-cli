@@ -3,8 +3,6 @@
 from pathlib import Path
 from typing import Annotated
 
-import mdtraj as md
-import numpy as np
 import typer
 
 
@@ -16,6 +14,9 @@ def command(
     output: Annotated[Path, typer.Option("--out")] = Path("distance.csv"),
 ) -> None:
     """Distance (nm) between two atom selections over time."""
+    import mdtraj as md
+    import numpy as np
+
     traj = md.load(str(trajectory), top=str(topology))
 
     idx_a = traj.topology.select(selection_a)

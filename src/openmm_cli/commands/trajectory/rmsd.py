@@ -3,7 +3,6 @@
 from pathlib import Path
 from typing import Annotated
 
-import mdtraj as md
 import typer
 
 
@@ -20,6 +19,8 @@ def command(
     ] = "name CA",
 ) -> None:
     """RMSD (nm) of each frame versus a reference, after optimal alignment."""
+    import mdtraj as md
+
     traj = md.load(str(trajectory), top=str(topology))
     ref = md.load(str(reference), top=str(topology)) if reference else traj[0]
 

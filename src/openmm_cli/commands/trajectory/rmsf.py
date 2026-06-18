@@ -3,8 +3,6 @@
 from pathlib import Path
 from typing import Annotated
 
-import mdtraj as md
-import numpy as np
 import typer
 
 
@@ -22,6 +20,9 @@ def command(
     ] = True,
 ) -> None:
     """Per-atom RMSF (nm) of the selected atoms over the trajectory."""
+    import mdtraj as md
+    import numpy as np
+
     traj = md.load(str(trajectory), top=str(topology))
     atom_indices = traj.topology.select(selection)
     if len(atom_indices) == 0:

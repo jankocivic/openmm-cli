@@ -3,8 +3,6 @@
 from pathlib import Path
 from typing import Annotated
 
-import mdtraj as md
-import numpy as np
 import typer
 
 
@@ -20,6 +18,9 @@ def command(
     degrees: Annotated[bool, typer.Option("--degrees/--radians")] = True,
 ) -> None:
     """Angle A-B-C over time, using the center of mass of each selection (B is the vertex)."""
+    import mdtraj as md
+    import numpy as np
+
     traj = md.load(str(trajectory), top=str(topology))
 
     def com_of(sel: str) -> np.ndarray:

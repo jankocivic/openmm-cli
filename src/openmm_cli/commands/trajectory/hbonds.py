@@ -3,8 +3,6 @@
 from pathlib import Path
 from typing import Annotated
 
-import mdtraj as md
-import numpy as np
 import typer
 
 
@@ -27,6 +25,9 @@ def command(
     ] = None,
 ) -> None:
     """List hydrogen bonds present in at least `freq` of frames, with their per-bond occupancy."""
+    import mdtraj as md
+    import numpy as np
+
     traj = md.load(str(trajectory), top=str(topology))
     hbonds = md.baker_hubbard(traj, freq=freq, periodic=True)
 

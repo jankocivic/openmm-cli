@@ -3,7 +3,6 @@
 from pathlib import Path
 from typing import Annotated
 
-import mdtraj as md
 import typer
 
 
@@ -13,6 +12,8 @@ def command(
     output: Annotated[Path, typer.Option("--out")] = Path("imaged.dcd"),
 ) -> None:
     """Image molecules into the primary unit cell, keeping them whole across boundaries."""
+    import mdtraj as md
+
     traj = md.load(str(trajectory), top=str(topology))
     if traj.unitcell_lengths is None:
         raise typer.BadParameter("Trajectory has no periodic box; nothing to image.")

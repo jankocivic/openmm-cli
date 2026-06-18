@@ -3,7 +3,6 @@
 from pathlib import Path
 from typing import Annotated
 
-import mdtraj as md
 import typer
 
 
@@ -12,6 +11,8 @@ def command(
     topology: Annotated[Path, typer.Option("--top")],
 ) -> None:
     """Print frames, atoms, residues, chains, and box information."""
+    import mdtraj as md
+
     traj = md.load(str(trajectory), top=str(topology))
     top = traj.topology
 

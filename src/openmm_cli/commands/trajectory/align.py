@@ -3,7 +3,6 @@
 from pathlib import Path
 from typing import Annotated
 
-import mdtraj as md
 import typer
 
 
@@ -29,6 +28,8 @@ def command(
     ] = "name CA",
 ) -> None:
     """Align each frame to a reference by RMSD fit on the selected atoms."""
+    import mdtraj as md
+
     traj = md.load(str(trajectory), top=str(topology))
     ref = md.load(str(reference), top=str(topology)) if reference else traj[0]
 

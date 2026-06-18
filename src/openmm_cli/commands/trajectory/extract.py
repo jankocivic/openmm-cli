@@ -3,7 +3,6 @@
 from pathlib import Path
 from typing import Annotated
 
-import mdtraj as md
 import typer
 
 
@@ -18,6 +17,8 @@ def command(
     stride: Annotated[int, typer.Option(help="Take every Nth frame.")] = 1,
 ) -> None:
     """Extract a frame range [start:stop:stride] from a trajectory."""
+    import mdtraj as md
+
     traj = md.load(str(trajectory), top=str(topology))
     sliced = traj[start:stop:stride]
     sliced.save(str(output))

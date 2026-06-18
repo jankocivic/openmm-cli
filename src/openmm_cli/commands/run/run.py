@@ -20,9 +20,6 @@ from typing import Annotated
 import typer
 import yaml
 
-from .config import Config
-from .runner import Runner
-
 
 def command(
     config: Annotated[
@@ -30,6 +27,11 @@ def command(
     ],
 ) -> None:
     """Run an MD simulation from a YAML config file."""
+    # Imported here, not at module top, so building the CLI (and shell
+    # completion) doesn't pull in OpenMM/mdtraj via the config/runner chain.
+    from .config import Config
+    from .runner import Runner
+
     with open(config) as f:
         raw = yaml.safe_load(f)
     cfg = Config.model_validate(raw)

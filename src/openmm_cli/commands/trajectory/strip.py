@@ -3,7 +3,6 @@
 from pathlib import Path
 from typing import Annotated
 
-import mdtraj as md
 import typer
 
 
@@ -20,6 +19,8 @@ def command(
     ] = Path("stripped.pdb"),
 ) -> None:
     """Keep only the selected atoms; write a stripped trajectory and matching topology."""
+    import mdtraj as md
+
     traj = md.load(str(trajectory), top=str(topology))
     indices = traj.topology.select(keep)
     if len(indices) == 0:

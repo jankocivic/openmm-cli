@@ -4,9 +4,6 @@ from pathlib import Path
 from typing import Annotated, Literal
 
 import typer
-from openmm import unit
-from openmm.app import PDBFile
-from pdbfixer import PDBFixer
 
 
 def command(
@@ -41,6 +38,10 @@ def command(
     ] = "Cl-",
 ) -> None:
     """Add a water box and counterions to bring the system to the target ionic strength."""
+    from openmm import unit
+    from openmm.app import PDBFile
+    from pdbfixer import PDBFixer
+
     print(f"Loading {pdb}")
     fixer = PDBFixer(filename=str(pdb))
 

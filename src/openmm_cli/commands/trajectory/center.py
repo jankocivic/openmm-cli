@@ -3,7 +3,6 @@
 from pathlib import Path
 from typing import Annotated, Literal
 
-import mdtraj as md
 import typer
 
 
@@ -28,6 +27,8 @@ def command(
     ] = True,
 ) -> None:
     """Translate each frame so the selection's COM sits at the target, then by default image molecules."""
+    import mdtraj as md
+
     traj = md.load(str(trajectory), top=str(topology))
 
     idx = traj.topology.select(selection)
