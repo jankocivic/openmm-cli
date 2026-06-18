@@ -212,7 +212,7 @@ reporters:
   checkpoint: { file: prod.chk, interval: 50000 }
 ```
 
-- **trajectory** — coordinates over time. Format inferred from the extension or set with `format:` (`dcd`, `xtc`, `pdb`, `pdbx`, `hdf5`/`h5`, `netcdf`/`nc`). Add `selection:` (an mdtraj selection) to store only some atoms — supported for `dcd`, `hdf5`/`h5`, `netcdf`/`nc` only.
+- **trajectory** — coordinates over time. Format inferred from the extension or set with `format:` (`dcd`, `xtc`, `pdb`, `pdbx`, `hdf5`/`h5`, `netcdf`/`nc`). Add `selection:` (an mdtraj selection) to store only some atoms — supported for `dcd`, `hdf5`/`h5`, `netcdf`/`nc` only. The mdtraj-backed formats (`dcd`, `hdf5`/`h5`, `netcdf`/`nc`) store coordinates in single precision, so a one-time `TypeCastPerformanceWarning` about casting `float64` → `float32` is expected and harmless; the simulation's own precision is unaffected.
 - **state** — CSV of step, time, energies, temperature, volume, density, speed.
 - **checkpoint** — binary checkpoint for restarting.
 
