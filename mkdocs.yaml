@@ -13,5 +13,8 @@ plugins:
 
 nav:
   - Home: index.md
+  - Configuration:
+    - Configuration reference: configuration.md
+    - Stage types: stages.md
   - Reference:
     - CLI: reference/cli.md
