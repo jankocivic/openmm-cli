@@ -1,8 +1,3 @@
-# Fluorescent protein simulation from a pre-built AMBER topology.
-#
-# Workflow: minimize -> heat (with heavy-atom restraints)
-#        -> equilibrate (with CA restraints) -> production -> analysis.
-
 system:
   topology: fp.parm7
   coordinates: fp.pdb
@@ -54,6 +49,10 @@ stages:
         force_constant: 100 kJ/mol/nm^2
     reporters:
       state: { file: equil.csv, interval: 500 }
+
+  - name: replica
+    type: branch
+    count: 3
 
   - name: production
     type: dynamics

@@ -8,6 +8,7 @@
    - **Minimize** energy.
    - **Heat** from 100 K to 300 K over 10 ps under NVT, with heavy-atom restraints (1000 kJ/mol/nm²) keeping the protein essentially fixed.
    - **Equilibrate** at 300 K and 1 atm for 20 ps under NPT, with looser CA-only restraints (100 kJ/mol/nm²) allowing side-chain relaxation.
+   - **Replica** split the run in 3 independent replicas
    - **Production** at 300 K and 1 atm for 20 ps, no restraints; trajectory written every 1 ps.
 2. **Analyzes** the production trajectory inline:
    - `rmsd` — Cα RMSD vs the starting structure (`rmsd.csv`).
@@ -35,7 +36,7 @@ openmm-cli run config.yaml
 
 ## Runtime
 
-The simulation is 50 ps total (~25 000 integration steps). On a modern CPU expect to finish within 1 hour; on a CUDA GPU it should finish in a couple of minutes. To run faster, set `platform.name: CUDA` in `config.yaml`.
+The simulation is 90 ps total. On a modern CPU expect to finish within 1.5 hours; on a CUDA GPU it should finish in a couple of minutes. To run faster, set `platform.name: CUDA` in `config.yaml`.
 
 ## Notes
 
