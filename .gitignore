@@ -13,12 +13,11 @@ examples/**
 !examples/Amber_FP/run.sh
 !examples/Amber_FP/config.yaml
 !examples/Amber_FP/README.md
-./src/openmm_cli/__pycache__
-./src/openmm_cli/commands/run/__pycache__
-./src/openmm_cli/commands/__pycache__
 
-# Virtual environment (.venv)
-./src/openmm_cli.egg-info/
+# Build artifacts
+*.egg-info/
+
+# Virtual environment
 .venv/
 
 
