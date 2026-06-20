@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal
 
 from ..units import Quantity
-from ..reporters import build_reporters
 from . import SimulationStage, register_stage
 
 if TYPE_CHECKING:
@@ -22,9 +21,6 @@ class DynamicsStage(SimulationStage):
         sim = runner.simulation
         if self.randomize_velocities is not None:
             sim.context.setVelocitiesToTemperature(self.randomize_velocities)
-        for reporter in build_reporters(
-            self.reporters, self.steps, runner.output_dir, runner.topology
-        ):
-            sim.reporters.append(reporter)
+        self.add_reporters(runner, self.steps)
         print(f"  Running {self.steps} steps")
         sim.step(self.steps)

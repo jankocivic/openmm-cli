@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Literal
 
 from openmm import unit
 
-from ...reporters import build_reporters
 from ...selections import select_atoms
 from ...units import Quantity
 from .. import SimulationStage, register_stage
@@ -37,10 +36,7 @@ class RAMDStage(SimulationStage):
         ligand = _select(runner.topology, self.ligand)
         receptor = _select(runner.topology, self.receptor) if self.receptor else None
 
-        for reporter in build_reporters(
-            self.reporters, self.max_steps, runner.output_dir, runner.topology
-        ):
-            sim.reporters.append(reporter)
+        self.add_reporters(runner, self.max_steps)
 
         # RAMD logs only to its file; the console shows the standard progress
         # reporter above (verbose=False keeps the engine off stdout).

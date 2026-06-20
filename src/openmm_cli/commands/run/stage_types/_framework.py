@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, get_args
 
 from ..base import _Base
 from ..defaults import Defaults
-from ..reporters import Reporters
+from ..reporters import Reporters, build_reporters
 from ..restraints import Restraint
 
 if TYPE_CHECKING:
@@ -73,6 +73,17 @@ class SimulationStage(StageBase):
                 f"Stage {self.name!r}: a barostat needs a periodic nonbonded "
                 f"method (got {system_settings.nonbonded_method!r})."
             )
+
+    def add_reporters(self, runner: "Runner", total_steps: int) -> None:
+        """Attach this stage's configured reporters (+ console progress) to the sim.
+
+        ``total_steps`` is this stage's step count, used to scale the console
+        progress reporter.
+        """
+        for reporter in build_reporters(
+            self.reporters, total_steps, runner.output_dir, runner.topology
+        ):
+            runner.simulation.reporters.append(reporter)
 
     def build(self, cfg, defaults, state):
         """Construct this stage's simulation, seeded from the carried ``state``.

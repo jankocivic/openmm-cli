@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
-from ..reporters import build_reporters
 from ..units import Quantity
 from . import SimulationStage, register_stage
 
@@ -49,10 +48,7 @@ class HeatStage(SimulationStage):
     def run(self, runner: "Runner") -> None:
         sim = runner.simulation
         sim.integrator.setTemperature(self.start_temperature)
-        for reporter in build_reporters(
-            self.reporters, self.steps, runner.output_dir, runner.topology
-        ):
-            sim.reporters.append(reporter)
+        self.add_reporters(runner, self.steps)
         _ramp_temperature(
             sim, self.start_temperature, self.temperature, self.steps, self.n_chunks
         )
