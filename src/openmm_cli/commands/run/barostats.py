@@ -12,15 +12,14 @@ from typing import Annotated, Literal
 
 import openmm as mm
 from openmm import Vec3, unit
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
-from .config import Quantity
+from .base import _Base
+from .units import Quantity
 
 
-class BarostatBase(BaseModel):
+class BarostatBase(_Base):
     """Base class for every barostat type."""
-
-    model_config = ConfigDict(extra="forbid")
 
     frequency: int = 25
 

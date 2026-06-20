@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Literal
+from typing import TYPE_CHECKING, Literal
 
-from ..config import Quantity
 from ..reporters import build_reporters
+from ..units import Quantity
 from . import SimulationStage, register_stage
 
 if TYPE_CHECKING:
+    from ..defaults import Defaults
     from ..runner import Runner
+    from ..sources import SystemSettings
 
 
 def _ramp_temperature(simulation, start_T, end_T, steps, n_chunks=100):
@@ -34,7 +36,15 @@ class HeatStage(SimulationStage):
     temperature: Quantity  # ramp target
     n_chunks: int = 100  # ramp granularity
 
-    requires_thermostat: ClassVar[bool] = True
+    def validate_resolved(
+        self, defaults: "Defaults", system_settings: "SystemSettings"
+    ) -> None:
+        super().validate_resolved(defaults, system_settings)
+        if defaults.integrator.type == "Verlet":
+            raise ValueError(
+                f"Stage {self.name!r}: heating requires a thermostatted "
+                "integrator, but the resolved integrator is Verlet (NVE)."
+            )
 
     def run(self, runner: "Runner") -> None:
         sim = runner.simulation

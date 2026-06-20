@@ -10,7 +10,7 @@ hand the box to the topology-file constructor, then ``createSystem``. The box us
 at construction is resolved as: explicit ``box`` override -> coordinate-file box ->
 the restart/previous-stage ``State``'s box (passed in as ``restart_box``). That
 ``State`` also reapplies positions/velocities/box to the context afterward (see
-``system.build_simulation``), so on restart a box is available even with no
+``simulation.build_simulation``), so on restart a box is available even with no
 coordinates -- which is what lets GROMACS and CHARMM (whose topology files carry no
 box) restart from topology + state alone.
 """
@@ -19,13 +19,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, Literal
 
 from openmm import app, unit
 from openmm.app.internal.unitcell import computePeriodicBoxVectors
 from pydantic import model_validator
 
-from .config import Quantity, SystemSettings, _Base
+from .base import _Base
+from .units import Quantity
 
 
 @dataclass
@@ -40,6 +41,24 @@ class BuiltSystem:
     positions: object | None
     box_vectors: object | None
     system: object
+
+
+# ---- System settings -------------------------------------------------------
+
+
+class SystemSettings(_Base):
+    """How forces are computed -- the arguments to ``createSystem`` (run-wide)."""
+
+    nonbonded_method: Literal[
+        "NoCutoff", "CutoffNonPeriodic", "CutoffPeriodic", "Ewald", "PME", "LJPME"
+    ] = "PME"
+    nonbonded_cutoff: Quantity = 1.0 * unit.nanometers
+    constraints: Literal["HBonds", "AllBonds", "HAngles"] | None = "HBonds"
+    rigid_water: bool = True
+    hydrogen_mass: Quantity | None = None
+    ewald_error_tolerance: float = 0.0005
+    switch_distance: Quantity | None = None  # None = no LJ switching (OpenMM default)
+    remove_cm_motion: bool = True
 
 
 # ---- Box + coordinate helpers ----------------------------------------------

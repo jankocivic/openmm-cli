@@ -1,7 +1,8 @@
-"""Reporter config models and construction for a dynamics stage.
+"""Reporter config models and the OpenMM reporters they build.
 
-Owns both the config models (what the user requests in YAML) and the code that
-turns them into OpenMM reporters.
+Each reporter model (trajectory / state / checkpoint) carries its own ``build``,
+matching the source/barostat/restraint models. ``build_reporters`` orchestrates
+them for a stage and adds the always-on console progress reporter.
 """
 
 from __future__ import annotations
@@ -14,32 +15,8 @@ from mdtraj.reporters import DCDReporter as MDTrajDCDReporter
 from mdtraj.reporters import HDF5Reporter, NetCDFReporter
 from openmm import app
 
-from .config import _Base
+from .base import _Base
 from .selections import select_atoms
-
-
-class TrajectoryReporter(_Base):
-    file: Path
-    interval: int
-    format: (
-        Literal["dcd", "xtc", "pdb", "pdbx", "hdf5", "h5", "netcdf", "nc"] | None
-    ) = None
-    # If None, format is inferred from the file extension.
-    selection: str | None = None
-    # mdtraj selection string (e.g. "protein"); writes only those atoms. Only
-    # the mdtraj-backed formats below support this.
-
-
-class ReporterFile(_Base):
-    file: Path
-    interval: int
-
-
-class Reporters(_Base):
-    trajectory: TrajectoryReporter | None = None  # DCD/XTC/PDB/HDF5/NetCDF
-    state: ReporterFile | None = None  # CSV state data
-    checkpoint: ReporterFile | None = None  # binary checkpoint
-
 
 # Trajectory file format -> reporter class.
 _TRAJECTORY_REPORTERS = {
@@ -57,46 +34,83 @@ _TRAJECTORY_REPORTERS = {
 _SELECTION_FORMATS = {"dcd", "hdf5", "h5", "netcdf", "nc"}
 
 
-def _make_trajectory_reporter(cfg, output_dir: Path, topology):
-    """Build the reporter for the requested trajectory format."""
-    path = output_dir / cfg.file
-    fmt = (cfg.format or path.suffix.lstrip(".")).lower()
-    try:
-        reporter_cls = _TRAJECTORY_REPORTERS[fmt]
-    except KeyError:
-        raise ValueError(
-            f"Unknown trajectory format {fmt!r} for file {cfg.file}. "
-            f"Supported: {', '.join(sorted(_TRAJECTORY_REPORTERS))}."
-        )
-    if cfg.selection is None:
-        return reporter_cls(str(path), cfg.interval)
-    if fmt not in _SELECTION_FORMATS:
-        raise ValueError(
-            f"Trajectory format {fmt!r} does not support atom selection. "
-            f"Use one of: {', '.join(sorted(_SELECTION_FORMATS))}."
-        )
-    atom_subset = select_atoms(topology, cfg.selection, label="Trajectory selection")
-    return reporter_cls(str(path), cfg.interval, atomSubset=atom_subset)
+class TrajectoryReporter(_Base):
+    file: Path
+    interval: int
+    format: (
+        Literal["dcd", "xtc", "pdb", "pdbx", "hdf5", "h5", "netcdf", "nc"] | None
+    ) = None
+    # If None, format is inferred from the file extension.
+    selection: str | None = None
+    # mdtraj selection string (e.g. "protein"); writes only those atoms. Only
+    # the mdtraj-backed formats below support this.
+
+    def build(self, output_dir: Path, topology):
+        """Build the reporter for the requested trajectory format."""
+        path = output_dir / self.file
+        fmt = (self.format or path.suffix.lstrip(".")).lower()
+        try:
+            reporter_cls = _TRAJECTORY_REPORTERS[fmt]
+        except KeyError:
+            raise ValueError(
+                f"Unknown trajectory format {fmt!r} for file {self.file}. "
+                f"Supported: {', '.join(sorted(_TRAJECTORY_REPORTERS))}."
+            )
+        if self.selection is None:
+            return reporter_cls(str(path), self.interval)
+        if fmt not in _SELECTION_FORMATS:
+            raise ValueError(
+                f"Trajectory format {fmt!r} does not support atom selection. "
+                f"Use one of: {', '.join(sorted(_SELECTION_FORMATS))}."
+            )
+        atoms = select_atoms(topology, self.selection, label="Trajectory selection")
+        return reporter_cls(str(path), self.interval, atomSubset=atoms)
 
 
-def _make_state_reporter(cfg, output_dir: Path):
-    return app.StateDataReporter(
-        str(output_dir / cfg.file),
-        cfg.interval,
-        step=True,
-        time=True,
-        potentialEnergy=True,
-        kineticEnergy=True,
-        totalEnergy=True,
-        temperature=True,
-        volume=True,
-        density=True,
-        speed=True,
-    )
+class StateReporter(_Base):
+    """CSV of step / time / energies / temperature / volume / density / speed."""
+
+    file: Path
+    interval: int
+
+    def build(self, output_dir: Path):
+        return app.StateDataReporter(
+            str(output_dir / self.file),
+            self.interval,
+            step=True,
+            time=True,
+            potentialEnergy=True,
+            kineticEnergy=True,
+            totalEnergy=True,
+            temperature=True,
+            volume=True,
+            density=True,
+            speed=True,
+        )
+
+
+class CheckpointReporter(_Base):
+    """Binary checkpoint for restarting."""
+
+    file: Path
+    interval: int
+
+    def build(self, output_dir: Path):
+        return app.CheckpointReporter(str(output_dir / self.file), self.interval)
+
+
+class Reporters(_Base):
+    trajectory: TrajectoryReporter | None = None  # DCD/XTC/PDB/HDF5/NetCDF
+    state: StateReporter | None = None  # CSV state data
+    checkpoint: CheckpointReporter | None = None  # binary checkpoint
 
 
 def _make_progress_reporter(stage_steps: int):
-    """Console progress reporter, printed roughly 20 times per stage."""
+    """Console progress reporter, printed roughly 20 times per stage.
+
+    Always added by ``build_reporters`` and not user-configurable, so it stays a
+    plain helper rather than a config model.
+    """
     return app.StateDataReporter(
         sys.stdout,
         max(1, stage_steps // 20),
@@ -112,20 +126,13 @@ def _make_progress_reporter(stage_steps: int):
 def build_reporters(
     reporters_cfg: Reporters, stage_steps: int, output_dir: Path, topology
 ) -> list:
-    """Build the reporters for a stage (file outputs + console progress)."""
+    """Build a stage's reporters (configured file outputs + console progress)."""
     out = []
     if reporters_cfg.trajectory:
-        out.append(
-            _make_trajectory_reporter(reporters_cfg.trajectory, output_dir, topology)
-        )
+        out.append(reporters_cfg.trajectory.build(output_dir, topology))
     if reporters_cfg.state:
-        out.append(_make_state_reporter(reporters_cfg.state, output_dir))
+        out.append(reporters_cfg.state.build(output_dir))
     if reporters_cfg.checkpoint:
-        out.append(
-            app.CheckpointReporter(
-                str(output_dir / reporters_cfg.checkpoint.file),
-                reporters_cfg.checkpoint.interval,
-            )
-        )
+        out.append(reporters_cfg.checkpoint.build(output_dir))
     out.append(_make_progress_reporter(stage_steps))
     return out

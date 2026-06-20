@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
-from ..config import Quantity
+from ..units import Quantity
 from ..reporters import build_reporters
 from . import SimulationStage, register_stage
 

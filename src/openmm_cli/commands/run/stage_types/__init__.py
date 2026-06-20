@@ -4,25 +4,22 @@ from __future__ import annotations
 
 import importlib
 import pkgutil
-from typing import TYPE_CHECKING, ClassVar, get_args
+from typing import TYPE_CHECKING, get_args
 
-from pydantic import BaseModel, ConfigDict
-
-from ..config import Defaults
+from ..base import _Base
+from ..defaults import Defaults
 from ..reporters import Reporters
 from ..restraints import Restraint
 
 if TYPE_CHECKING:
     from ..runner import Runner
+    from ..sources import SystemSettings
 
 _REGISTRY: dict[str, type["StageBase"]] = {}
 
 
-class StageBase(BaseModel):
+class StageBase(_Base):
     """Base class for every pipeline stage."""
-
-    # Reject unknown keys so typos in a stage's YAML fail loudly.
-    model_config = ConfigDict(extra="forbid")
 
     name: str
     # Subclasses pin `type`, e.g. `type: Literal["dynamics"]`.
@@ -44,25 +41,54 @@ class SimulationStage(StageBase):
     restraints: list[Restraint] = []
     reporters: Reporters = Reporters()
 
-    # Stages that drive temperature (e.g. heating) set this so the config can
-    # reject them under a non-thermostatted (Verlet) integrator.
-    requires_thermostat: ClassVar[bool] = False
+    def validate_resolved(
+        self, defaults: Defaults, system_settings: "SystemSettings"
+    ) -> None:
+        """Validate this stage against its *resolved* settings.
+
+        ``defaults`` is the run defaults merged with this stage's override, and
+        ``system_settings`` the run-wide force settings. Called once per stage by
+        ``Config``. The base enforces the rules common to every simulation stage
+        (a barostat needs a thermostatted, periodic system); override and call
+        ``super().validate_resolved(...)`` to add stage-specific rules.
+        """
+        if defaults.barostat is None:
+            return
+        if defaults.integrator.type == "Verlet":
+            raise ValueError(
+                f"Stage {self.name!r}: a barostat needs a thermostatted "
+                "integrator (NPT needs a target temperature)."
+            )
+        periodic = system_settings.nonbonded_method not in (
+            "NoCutoff",
+            "CutoffNonPeriodic",
+        )
+        if not periodic:
+            raise ValueError(
+                f"Stage {self.name!r}: a barostat needs a periodic nonbonded "
+                f"method (got {system_settings.nonbonded_method!r})."
+            )
 
     def build(self, cfg, defaults, state):
         """Construct this stage's simulation, seeded from the carried ``state``.
 
-        The default builds the standard simulation -- system + ``defaults.barostat``
-        + this stage's ``restraints``, with the integrator/platform from the
-        resolved ``defaults``. Override this for methods that assemble the
-        simulation differently (e.g. metadynamics or alchemical free energy, which
-        add forces before the context and may step via their own helper object);
-        compose ``cfg.system.build`` / ``build_integrator`` / ``make_platform``
-        as needed.
+        Builds the default simulation from the run-wide config (system + the
+        run-wide ``defaults.barostat``, integrator/platform from the resolved
+        ``defaults``), then adds this stage's ``restraints`` on top. Override this
+        for methods that assemble the simulation differently (e.g. metadynamics or
+        alchemical free energy); compose ``build_simulation`` and add forces as
+        needed.
         """
-        # Local import avoids a config <-> system import cycle at module load.
-        from ..system import build_simulation
+        # Local import avoids an import cycle at module load.
+        from ..simulation import build_simulation
 
-        return build_simulation(cfg, defaults, self.restraints, state)
+        sim = build_simulation(cfg.system, cfg.system_settings, defaults, state)
+        if self.restraints:
+            anchor = sim.context.getState(getPositions=True).getPositions()
+            for restraint in self.restraints:
+                sim.system.addForce(restraint.build(sim.topology, anchor))
+            sim.context.reinitialize(preserveState=True)
+        return sim
 
 
 def _tag_of(cls: type[StageBase]) -> str:
