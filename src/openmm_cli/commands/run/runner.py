@@ -4,9 +4,17 @@ Between stages only the OpenMM ``State`` (positions, velocities, box vectors) is
 carried forward; each stage's simulation is built fresh from the run ``defaults``
 plus that stage's overrides. A ``branch`` stage reruns the remaining stages once
 per copy from the same state, into per-branch subdirectories.
+
+Re-running into an existing ``output_dir`` resumes automatically: any stage whose
+end-state ``{name}.xml`` is already present is skipped and its saved state carried
+forward, so an interrupted run continues from the last completed stage. (The
+config is assumed unchanged -- it is the user's responsibility to use a fresh
+``output_dir`` when the config changes.)
 """
 
 from __future__ import annotations
+
+import os
 
 import openmm as mm
 import yaml
@@ -57,6 +65,13 @@ class Runner:
             self.output_dir = out_dir
 
             if isinstance(stage, SimulationStage):
+                state_path = out_dir / f"{stage.name}.xml"
+                if state_path.exists():
+                    # Resume: this stage finished on a previous run. Skip it and
+                    # carry its saved end state forward to the next stage.
+                    print(f"  Already complete; resuming from {state_path.name}")
+                    state = mm.XmlSerializer.deserialize(state_path.read_text())
+                    continue
                 defaults = merge_defaults(self.cfg.defaults, stage.defaults)
                 self.simulation = stage.build(self.cfg, defaults, state)
                 # `setState` carried the step count and clock forward; zero them
@@ -67,11 +82,24 @@ class Runner:
                 state = self.simulation.context.getState(
                     getPositions=True, getVelocities=True
                 )
-                with open(out_dir / f"{stage.name}.xml", "w") as f:
-                    f.write(mm.XmlSerializer.serialize(state))
+                self._save_state(state, state_path)
             else:  # non-simulation stage (e.g. analysis): state unchanged
                 self.simulation = None
                 stage.run(self)
+
+    def _save_state(self, state, path) -> None:
+        """Write a stage's end ``State`` to ``path`` atomically.
+
+        Serializes to a temp file and ``os.replace``-s it into place, so a crash
+        mid-write can never leave a partial ``{stage}.xml`` that a later resume
+        would mistake for a completed stage.
+        """
+        tmp = path.with_name(path.name + ".tmp")
+        with open(tmp, "w") as f:
+            f.write(mm.XmlSerializer.serialize(state))
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
 
     def _announce_coordinate_source(self) -> None:
         system = self.cfg.system

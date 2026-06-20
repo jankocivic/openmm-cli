@@ -167,6 +167,8 @@ barostat:
 
 Directory for all outputs (default `output`). The runner creates it, writes a `resolved_config.yaml` (the full config with every default filled in, for reproducibility), and resolves each stage's reporter/analysis paths relative to it. Each simulation stage also saves its end state as `{stage_name}.xml` here.
 
+**Resuming.** Re-running into an existing `output_dir` continues automatically: any simulation stage whose `{stage_name}.xml` is already present is skipped and its saved state carried forward, so an interrupted run picks up from the last completed stage. State files are written atomically, so a stage interrupted mid-write is treated as incomplete and re-run. The config is assumed unchanged between runs — if you change it, use a fresh `output_dir` (or delete the old outputs), since stale stages would otherwise be skipped.
+
 ---
 
 ## `stages`
