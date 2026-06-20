@@ -60,30 +60,48 @@ On restart the state's box is also reapplied to the context afterwards, so it is
 
 A few format examples:
 
-```yaml
-# AMBER: prmtop + coordinates (.inpcrd, .rst7, or .pdb)
-system: { topology: protein.parm7, coordinates: protein.inpcrd }
+=== "AMBER"
 
-# OpenMM force field: the PDB is the topology; coordinates default to it
-system:
-  topology: protein.pdb
-  forcefield: [amber14-all.xml, amber14/tip3pfb.xml]
+    ```yaml
+    # prmtop + coordinates (.inpcrd, .rst7, or .pdb)
+    system: { topology: protein.parm7, coordinates: protein.inpcrd }
+    ```
 
-# GROMACS: top + gro, with the force-field include directory
-system:
-  topology: system.top
-  coordinates: system.gro
-  include_dir: /usr/local/gromacs/share/gromacs/top
+=== "OpenMM force field"
 
-# CHARMM: psf + coordinates + parameter set (box from the PDB's CRYST1)
-system:
-  topology: system.psf
-  coordinates: system.pdb
-  parameters: [charmm22.rtf, charmm22.prm]
+    ```yaml
+    # the PDB is the topology; coordinates default to it
+    system:
+      topology: protein.pdb
+      forcefield: [amber14-all.xml, amber14/tip3pfb.xml]
+    ```
 
-# Restart: any format; coordinates optional (the state provides positions + box)
-system: { topology: protein.parm7, restart_from: previous_run/production.xml }
-```
+=== "GROMACS"
+
+    ```yaml
+    # top + gro, with the force-field include directory
+    system:
+      topology: system.top
+      coordinates: system.gro
+      include_dir: /usr/local/gromacs/share/gromacs/top
+    ```
+
+=== "CHARMM"
+
+    ```yaml
+    # psf + coordinates + parameter set (box from the PDB's CRYST1)
+    system:
+      topology: system.psf
+      coordinates: system.pdb
+      parameters: [charmm22.rtf, charmm22.prm]
+    ```
+
+=== "Restart"
+
+    ```yaml
+    # any format; coordinates optional (the state provides positions + box)
+    system: { topology: protein.parm7, restart_from: previous_run/production.xml }
+    ```
 
 !!! warning "GROMACS and CHARMM input is experimental"
     The AMBER and OpenMM force-field paths are the well-tested ones. GROMACS (`.top`) and CHARMM (`.psf`) input works in principle but has **not been thoroughly verified** — sanity-check energies and structures before trusting a run.
