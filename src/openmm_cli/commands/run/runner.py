@@ -12,7 +12,8 @@ from __future__ import annotations
 import openmm as mm
 import yaml
 
-from .config import Config, merge_defaults
+from .config import Config
+from .defaults import merge_defaults
 from .stage_types import SimulationStage
 
 

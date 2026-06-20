@@ -9,7 +9,7 @@ restraint type:
   2. add it to the :data:`Restraint` union below.
 
 Restraints are added to a stage's freshly-built system at construction time (see
-``system.build_simulation``) and discarded with it, so there is no add/remove
+``simulation.build_simulation``) and discarded with it, so there is no add/remove
 bookkeeping here -- just the force factories.
 """
 
@@ -19,17 +19,14 @@ from typing import Literal
 
 import openmm as mm
 from openmm import unit
-from pydantic import BaseModel, ConfigDict
 
-from .config import Quantity
+from .base import _Base
 from .selections import select_atoms
+from .units import Quantity
 
 
-class RestraintBase(BaseModel):
+class RestraintBase(_Base):
     """Base class for every restraint type."""
-
-    # Reject unknown keys so typos in a restraint's YAML fail loudly.
-    model_config = ConfigDict(extra="forbid")
 
     def build(self, topology, positions) -> mm.Force:
         """Build the OpenMM force for this restraint. Override this."""

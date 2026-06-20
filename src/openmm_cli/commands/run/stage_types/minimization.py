@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Literal
 
 from openmm import unit
 
-from ..config import Quantity
+from ..units import Quantity
 from . import SimulationStage, register_stage
 
 if TYPE_CHECKING:

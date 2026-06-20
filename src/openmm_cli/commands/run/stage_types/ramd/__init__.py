@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Literal
 
 from openmm import unit
 
-from ...config import Quantity
+from ...units import Quantity
 from ...reporters import build_reporters
 from ...selections import select_atoms
 from .. import SimulationStage, register_stage

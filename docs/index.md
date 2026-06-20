@@ -204,7 +204,9 @@ class MyStage(SimulationStage):
 
 Then use it in a config: `- {name: relax, type: my_stage, steps: 1000}`. A stage that only post-processes outputs (no simulation) subclasses `StageBase` directly instead.
 
-For methods that need to construct the simulation differently — e.g. metadynamics or free-energy setups that add forces before the context, or step via their own helper — override `build(self, cfg, defaults, state)`. By default it builds the standard simulation; override it to assemble a custom one (reusing `cfg.system.build` / `build_integrator` / `make_platform`).
+For methods that need to construct the simulation differently — e.g. metadynamics or free-energy setups that add forces before the context, or step via their own helper — override `build(self, cfg, defaults, state)`. By default it builds the standard simulation; override it to assemble a custom one (reusing `cfg.system.build` / `defaults.integrator.build` / `defaults.platform.build`).
+
+To reject incoherent configs up front, override `validate_resolved(self, defaults, system_settings)`. It runs at config-load time against the stage's *resolved* settings (run `defaults` merged with the stage's override). Call `super().validate_resolved(...)` to keep the shared checks (a barostat needs a thermostatted, periodic system) and add your own — this keeps each stage's validation in its own file rather than in the central config.
 
 ---
 
