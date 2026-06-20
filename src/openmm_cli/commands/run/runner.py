@@ -3,8 +3,7 @@
 Between stages only the OpenMM ``State`` (positions, velocities, box vectors) is
 carried forward; each stage's simulation is built fresh from the run ``defaults``
 plus that stage's overrides. A ``branch`` stage reruns the remaining stages once
-per copy from the same state, into per-branch subdirectories. See
-``REBUILD_PLAN.md``.
+per copy from the same state, into per-branch subdirectories.
 """
 
 from __future__ import annotations
@@ -15,18 +14,14 @@ import yaml
 from .config import Config
 from .defaults import merge_defaults
 from .stage_types import SimulationStage
+from .stage_types.branch import BranchStage
 
 
 class Runner:
-    def __init__(self, cfg: Config, simulation=None, output_dir=None) -> None:
+    def __init__(self, cfg: Config) -> None:
         self.cfg = cfg
-        self.simulation = simulation          # the current stage's Simulation, or None
-        self.output_dir = output_dir if output_dir is not None else cfg.output_dir
-
-    @property
-    def system(self):
-        """The OpenMM ``System`` of the current stage's simulation."""
-        return self.simulation.system
+        self.simulation = None          # the current stage's Simulation, or None
+        self.output_dir = cfg.output_dir
 
     @property
     def topology(self):
@@ -50,12 +45,11 @@ class Runner:
     def _run_stages(self, stages, state, out_dir) -> None:
         """Run ``stages`` in order, threading the carried ``State`` between them."""
         for i, stage in enumerate(stages):
-            if stage.type == "branch":
+            if isinstance(stage, BranchStage):
                 print(f"\n=== Branch: {stage.name} (x{stage.count}) ===")
                 for j in range(stage.count):
-                    self._run_stages(
-                        stages[i + 1:], state, out_dir / f"{stage.name}_{j}"
-                    )
+                    branch_dir = out_dir / f"{stage.name}_{j}"
+                    self._run_stages(stages[i + 1:], state, branch_dir)
                 return  # a branch consumes the remaining stages
 
             print(f"\n=== Stage: {stage.name} ({stage.type}) ===")
