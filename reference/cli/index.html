@@ -1,0 +1,957 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../../stages/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>CLI - openmm-cli</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#command-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="openmm-cli" class="md-header__button md-logo" aria-label="openmm-cli" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            openmm-cli
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              CLI
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jankocivic/openmm-cli" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="openmm-cli" class="md-nav__button md-logo" aria-label="openmm-cli" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    openmm-cli
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jankocivic/openmm-cli" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Configuration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../stages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stage types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="command-reference">Command reference</h1>
+<div class="typer-docs">
+<h1 id="openmm-cli"><code>openmm-cli</code></h1>
+<p>OpenMM command line interface.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli [OPTIONS] COMMAND [ARGS]...</code></p>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--install-completion</code>: Install completion for the current shell.</li>
+<li><code>--show-completion</code>: Show completion for the current shell, to copy it or customize the installation.</li>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<p><strong>Commands</strong>:</p>
+<ul>
+<li><code>dashboard</code>: Launch a web dashboard that plots CSV...</li>
+<li><code>run</code>: Run an MD simulation from a YAML config file.</li>
+<li><code>prepare</code>: System preparation commands.</li>
+<li><code>trajectory</code>: Trajectory analysis and processing.</li>
+</ul>
+<h2 id="openmm-cli-dashboard"><code>openmm-cli dashboard</code></h2>
+<p>Launch a web dashboard that plots CSV output files</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli dashboard [OPTIONS] [DIRECTORY]</code></p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>[DIRECTORY]</code>: Directory to display. Defaults to the current directory.  [default: .]</li>
+</ul>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--port INTEGER</code>: Port to serve on.  [default: 8501]</li>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<h2 id="openmm-cli-run"><code>openmm-cli run</code></h2>
+<p>Run an MD simulation from a YAML config file.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli run [OPTIONS] CONFIG</code></p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>CONFIG</code>: Path to yaml configuration file.  [required]</li>
+</ul>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<h2 id="openmm-cli-prepare"><code>openmm-cli prepare</code></h2>
+<p>System preparation commands.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli prepare [OPTIONS] COMMAND [ARGS]...</code></p>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<p><strong>Commands</strong>:</p>
+<ul>
+<li><code>clean</code>: Clean a PDB file with pdbfixer: fix...</li>
+<li><code>solvate</code>: Add a water box and counterions to bring...</li>
+</ul>
+<h3 id="openmm-cli-prepare-clean"><code>openmm-cli prepare clean</code></h3>
+<p>Clean a PDB file with pdbfixer: fix structure, add hydrogens, optionally strip extras.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli prepare clean [OPTIONS] PDB</code></p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>PDB</code>: Input PDB file.  [required]</li>
+</ul>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--out PATH</code>: Output PDB file.  [default: cleaned.pdb]</li>
+<li><code>--ph FLOAT</code>: pH used to assign protonation states.  [default: 7.4]</li>
+<li><code>--keep-water / --strip-water</code>: Keep crystallographic water molecules (only applies when stripping heteroatoms).  [default: strip-water]</li>
+<li><code>--keep-hetero / --strip-hetero</code>: Keep ligands, cofactors, and ions. Off by default for protein-only output.  [default: strip-hetero]</li>
+<li><code>--add-residues / --no-add-residues</code>: Build in missing residues (gaps/loops). Off by default to avoid silent insertions.  [default: no-add-residues]</li>
+<li><code>--replace-nonstandard / --keep-nonstandard</code>: Replace nonstandard residues (e.g. MSE -&gt; MET) with their standard equivalents.  [default: replace-nonstandard]</li>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<h3 id="openmm-cli-prepare-solvate"><code>openmm-cli prepare solvate</code></h3>
+<p>Add a water box and counterions to bring the system to the target ionic strength.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli prepare solvate [OPTIONS] PDB</code></p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>PDB</code>: Input PDB file (typically already cleaned).  [required]</li>
+</ul>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--out PATH</code>: Output solvated PDB file.  [default: solvated.pdb]</li>
+<li><code>--padding FLOAT</code>: Minimum distance (nm) from solute to box edge.  [default: 1.0]</li>
+<li><code>--box-shape [cube|dodecahedron|octahedron]</code>: Shape of the periodic box.  [default: cube]</li>
+<li><code>--ionic-strength FLOAT</code>: Ionic strength in mol/L (physiological ~0.15).  [default: 0.15]</li>
+<li><code>--positive-ion TEXT</code>: Cation species (Na+, K+, Li+, Rb+, Cs+).  [default: Na+]</li>
+<li><code>--negative-ion TEXT</code>: Anion species (Cl-, Br-, F-, I-).  [default: Cl-]</li>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<h2 id="openmm-cli-trajectory"><code>openmm-cli trajectory</code></h2>
+<p>Trajectory analysis and processing.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli trajectory [OPTIONS] COMMAND [ARGS]...</code></p>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<p><strong>Commands</strong>:</p>
+<ul>
+<li><code>align</code>: Align each frame to a reference by RMSD...</li>
+<li><code>angle</code>: Angle A-B-C over time, using the center of...</li>
+<li><code>average</code>: Average a trajectory's coordinates into a...</li>
+<li><code>center</code>: Translate each frame so the selection's...</li>
+<li><code>convert</code>: Convert a trajectory between formats.</li>
+<li><code>dihedral</code>: Dihedral angle A-B-C-D over time, using...</li>
+<li><code>distance</code>: Distance (nm) between two atom selections...</li>
+<li><code>extract</code>: Extract a frame range ...</li>
+<li><code>hbonds</code>: List hydrogen bonds present in at least...</li>
+<li><code>image</code>: Image molecules into the primary unit...</li>
+<li><code>info</code>: Print frames, atoms, residues, chains, and...</li>
+<li><code>rmsd</code>: RMSD (nm) of each frame versus a...</li>
+<li><code>rmsf</code>: Per-atom RMSF (nm) of the selected atoms...</li>
+<li><code>strip</code>: Keep only the selected atoms; write a...</li>
+</ul>
+<h3 id="openmm-cli-trajectory-align"><code>openmm-cli trajectory align</code></h3>
+<p>Align each frame to a reference by RMSD fit on the selected atoms.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli trajectory align [OPTIONS] TRAJECTORY</code></p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>TRAJECTORY</code>: Input trajectory file.  [required]</li>
+</ul>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--top PATH</code>: Topology file (parm7, pdb, ...).  [required]</li>
+<li><code>--out PATH</code>: Output trajectory.  [default: aligned.dcd]</li>
+<li><code>--ref PATH</code>: Reference structure (default: first frame of trajectory).</li>
+<li><code>--sel TEXT</code>: Atoms to use for the fit (mdtraj selection syntax).  [default: name CA]</li>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<h3 id="openmm-cli-trajectory-angle"><code>openmm-cli trajectory angle</code></h3>
+<p>Angle A-B-C over time, using the center of mass of each selection (B is the vertex).</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli trajectory angle [OPTIONS] TRAJECTORY</code></p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>TRAJECTORY</code>: [required]</li>
+</ul>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--top PATH</code>: [required]</li>
+<li><code>--a TEXT</code>: First selection.  [required]</li>
+<li><code>--b TEXT</code>: Second selection (the vertex).  [required]</li>
+<li><code>--c TEXT</code>: Third selection.  [required]</li>
+<li><code>--out PATH</code>: [default: angle.csv]</li>
+<li><code>--degrees / --radians</code>: [default: degrees]</li>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<h3 id="openmm-cli-trajectory-average"><code>openmm-cli trajectory average</code></h3>
+<p>Average a trajectory's coordinates into a single structure.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli trajectory average [OPTIONS] TRAJECTORY</code></p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>TRAJECTORY</code>: Input trajectory.  [required]</li>
+</ul>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--top PATH</code>: Topology file.  [required]</li>
+<li><code>--sel TEXT</code>: Atoms to superpose on before averaging.  [default: name CA]</li>
+<li><code>--out PATH</code>: Output structure file (format by extension).  [default: average.pdb]</li>
+<li><code>--iterations INTEGER</code>: Re-superpose onto the running average N times.  [default: 2]</li>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<h3 id="openmm-cli-trajectory-center"><code>openmm-cli trajectory center</code></h3>
+<p>Translate each frame so the selection's COM sits at the target, then by default image molecules.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli trajectory center [OPTIONS] TRAJECTORY</code></p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>TRAJECTORY</code>: [required]</li>
+</ul>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--top PATH</code>: [required]</li>
+<li><code>--out PATH</code>: [default: centered.dcd]</li>
+<li><code>--sel TEXT</code>: Selection whose center of mass should be moved.  [default: protein]</li>
+<li><code>--target [box|origin]</code>: Where to place the COM.  [default: box]</li>
+<li><code>--image / --no-image</code>: Image molecules into the unit cell after centering.  [default: image]</li>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<h3 id="openmm-cli-trajectory-convert"><code>openmm-cli trajectory convert</code></h3>
+<p>Convert a trajectory between formats. Output format is inferred from the extension.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli trajectory convert [OPTIONS] TRAJECTORY</code></p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>TRAJECTORY</code>: Input trajectory.  [required]</li>
+</ul>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--top PATH</code>: [required]</li>
+<li><code>--out PATH</code>: Output trajectory; format inferred from extension (.dcd, .xtc, .trr, .nc, .h5).  [default: converted.xtc]</li>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<h3 id="openmm-cli-trajectory-dihedral"><code>openmm-cli trajectory dihedral</code></h3>
+<p>Dihedral angle A-B-C-D over time, using the center of mass of each selection.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli trajectory dihedral [OPTIONS] TRAJECTORY</code></p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>TRAJECTORY</code>: [required]</li>
+</ul>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--top PATH</code>: [required]</li>
+<li><code>--a TEXT</code>: [required]</li>
+<li><code>--b TEXT</code>: [required]</li>
+<li><code>--c TEXT</code>: [required]</li>
+<li><code>--d TEXT</code>: [required]</li>
+<li><code>--out PATH</code>: [default: dihedral.csv]</li>
+<li><code>--degrees / --radians</code>: [default: degrees]</li>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<h3 id="openmm-cli-trajectory-distance"><code>openmm-cli trajectory distance</code></h3>
+<p>Distance (nm) between two atom selections over time.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli trajectory distance [OPTIONS] TRAJECTORY</code></p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>TRAJECTORY</code>: [required]</li>
+</ul>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--top PATH</code>: [required]</li>
+<li><code>--a TEXT</code>: First atom selection.  [required]</li>
+<li><code>--b TEXT</code>: Second atom selection.  [required]</li>
+<li><code>--out PATH</code>: [default: distance.csv]</li>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<h3 id="openmm-cli-trajectory-extract"><code>openmm-cli trajectory extract</code></h3>
+<p>Extract a frame range  from a trajectory.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli trajectory extract [OPTIONS] TRAJECTORY</code></p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>TRAJECTORY</code>: [required]</li>
+</ul>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--top PATH</code>: [required]</li>
+<li><code>--out PATH</code>: [default: extracted.dcd]</li>
+<li><code>--start INTEGER</code>: First frame (0-indexed).  [default: 0]</li>
+<li><code>--stop INTEGER</code>: Stop frame (exclusive). Default: end.</li>
+<li><code>--stride INTEGER</code>: Take every Nth frame.  [default: 1]</li>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<h3 id="openmm-cli-trajectory-hbonds"><code>openmm-cli trajectory hbonds</code></h3>
+<p>List hydrogen bonds present in at least <code>freq</code> of frames, with their per-bond occupancy.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli trajectory hbonds [OPTIONS] TRAJECTORY</code></p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>TRAJECTORY</code>: [required]</li>
+</ul>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--top PATH</code>: [required]</li>
+<li><code>--out PATH</code>: [default: hbonds.csv]</li>
+<li><code>--freq FLOAT</code>: Minimum fraction of frames an H-bond must be present (0-1).  [default: 0.1]</li>
+<li><code>--sel TEXT</code>: Restrict to H-bonds where both donor and acceptor are in this selection.</li>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<h3 id="openmm-cli-trajectory-image"><code>openmm-cli trajectory image</code></h3>
+<p>Image molecules into the primary unit cell, keeping them whole across boundaries.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli trajectory image [OPTIONS] TRAJECTORY</code></p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>TRAJECTORY</code>: [required]</li>
+</ul>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--top PATH</code>: [required]</li>
+<li><code>--out PATH</code>: [default: imaged.dcd]</li>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<h3 id="openmm-cli-trajectory-info"><code>openmm-cli trajectory info</code></h3>
+<p>Print frames, atoms, residues, chains, and box information.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli trajectory info [OPTIONS] TRAJECTORY</code></p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>TRAJECTORY</code>: [required]</li>
+</ul>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--top PATH</code>: [required]</li>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<h3 id="openmm-cli-trajectory-rmsd"><code>openmm-cli trajectory rmsd</code></h3>
+<p>RMSD (nm) of each frame versus a reference, after optimal alignment.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli trajectory rmsd [OPTIONS] TRAJECTORY</code></p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>TRAJECTORY</code>: [required]</li>
+</ul>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--top PATH</code>: [required]</li>
+<li><code>--out PATH</code>: [default: rmsd.csv]</li>
+<li><code>--ref PATH</code>: Reference structure (default: first frame).</li>
+<li><code>--sel TEXT</code>: Atoms for the fit and RMSD calculation.  [default: name CA]</li>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<h3 id="openmm-cli-trajectory-rmsf"><code>openmm-cli trajectory rmsf</code></h3>
+<p>Per-atom RMSF (nm) of the selected atoms over the trajectory.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli trajectory rmsf [OPTIONS] TRAJECTORY</code></p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>TRAJECTORY</code>: [required]</li>
+</ul>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--top PATH</code>: [required]</li>
+<li><code>--out PATH</code>: [default: rmsf.csv]</li>
+<li><code>--sel TEXT</code>: [default: name CA]</li>
+<li><code>--align / --no-align</code>: RMSD-fit trajectory to frame 0 before computing RMSF.  [default: align]</li>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+<h3 id="openmm-cli-trajectory-strip"><code>openmm-cli trajectory strip</code></h3>
+<p>Keep only the selected atoms; write a stripped trajectory and matching topology.</p>
+<p><strong>Usage</strong>:</p>
+<p><code>console
+$ openmm-cli trajectory strip [OPTIONS] TRAJECTORY</code></p>
+<p><strong>Arguments</strong>:</p>
+<ul>
+<li><code>TRAJECTORY</code>: [required]</li>
+</ul>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><code>--top PATH</code>: [required]</li>
+<li><code>--out PATH</code>: [default: stripped.dcd]</li>
+<li><code>--keep TEXT</code>: Atoms to keep (mdtraj selection).  [default: not water]</li>
+<li><code>--top-out PATH</code>: Where to write the stripped topology (PDB).  [default: stripped.pdb]</li>
+<li><code>--help</code>: Show this message and exit.</li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "toc.follow", "content.code.copy", "content.code.annotate", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
