@@ -1,0 +1,1367 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../stages/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Configuration reference - openmm-cli</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#configuration-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="openmm-cli" class="md-header__button md-logo" aria-label="openmm-cli" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            openmm-cli
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Configuration reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jankocivic/openmm-cli" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="openmm-cli" class="md-nav__button md-logo" aria-label="openmm-cli" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    openmm-cli
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jankocivic/openmm-cli" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Configuration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        system
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="system">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#coordinates-and-the-box" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coordinates and the box
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system_settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        system_settings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        defaults
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="defaults">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#integrator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        integrator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#barostat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        barostat
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        platform
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output_dir" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        output_dir
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stages
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="stages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#per-stage-defaults-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-stage defaults overrides
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#restraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        restraints
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reporters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        reporters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flow-of-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flow of information
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stage types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        system
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="system">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#coordinates-and-the-box" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coordinates and the box
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system_settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        system_settings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        defaults
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="defaults">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#integrator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        integrator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#barostat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        barostat
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        platform
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output_dir" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        output_dir
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stages
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="stages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#per-stage-defaults-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-stage defaults overrides
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#restraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        restraints
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reporters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        reporters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flow-of-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flow of information
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="configuration-reference">Configuration reference</h1>
+<p>An <code>openmm-cli run</code> workflow is described by a single YAML file passed to <code>openmm-cli run config.yaml</code>. This page documents every element of that file and explains how information flows through a run.</p>
+<p>The file has five top-level keys:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Required</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>system</code></td>
+<td>yes</td>
+<td>What to simulate — topology, coordinates, and (per format) force-field inputs.</td>
+</tr>
+<tr>
+<td><code>system_settings</code></td>
+<td>no</td>
+<td>How forces are computed (the arguments to <code>createSystem</code>).</td>
+</tr>
+<tr>
+<td><code>defaults</code></td>
+<td>no</td>
+<td>How the simulation is built — integrator, barostat, platform.</td>
+</tr>
+<tr>
+<td><code>output_dir</code></td>
+<td>no</td>
+<td>Where outputs are written (default <code>output</code>).</td>
+</tr>
+<tr>
+<td><code>stages</code></td>
+<td>yes</td>
+<td>The ordered list of steps to run.</td>
+</tr>
+</tbody>
+</table>
+<p>A minimal file needs only <code>system</code> and <code>stages</code>; everything else has defaults.</p>
+<hr />
+<h2 id="system"><code>system</code></h2>
+<p>Selects the input format from the <strong>topology</strong> file's extension and provides the files needed to build the OpenMM <code>System</code>. Fields common to every format:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>topology</code></td>
+<td>path</td>
+<td>—</td>
+<td>The topology file. Its extension selects the format.</td>
+</tr>
+<tr>
+<td><code>coordinates</code></td>
+<td>path</td>
+<td>none</td>
+<td>Positions (and usually the box). Optional on restart, and for the PDB format (the topology <em>is</em> the coordinates).</td>
+</tr>
+<tr>
+<td><code>restart_from</code></td>
+<td>path</td>
+<td>none</td>
+<td>A saved state XML; supplies positions, velocities, and box.</td>
+</tr>
+<tr>
+<td><code>box</code></td>
+<td>block</td>
+<td>none</td>
+<td>Explicit unit cell, used only when no other source provides one.</td>
+</tr>
+</tbody>
+</table>
+<p>Each format then adds one field:</p>
+<table>
+<thead>
+<tr>
+<th>Topology</th>
+<th>Format</th>
+<th>Adds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.parm7</code> / <code>.prmtop</code></td>
+<td>AMBER</td>
+<td>— (the prmtop is self-contained)</td>
+</tr>
+<tr>
+<td><code>.pdb</code> / <code>.cif</code></td>
+<td>OpenMM force field</td>
+<td><code>forcefield</code> — list of force-field XMLs</td>
+</tr>
+<tr>
+<td><code>.top</code></td>
+<td>GROMACS</td>
+<td><code>include_dir</code> — directory of the force-field <code>.itp</code> files</td>
+</tr>
+<tr>
+<td><code>.psf</code></td>
+<td>CHARMM</td>
+<td><code>parameters</code> — list of <code>rtf</code>/<code>prm</code>/<code>str</code> files</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>box</code> block is edge lengths plus optional angles (degrees, default 90):</p>
+<div class="highlight"><pre><span></span><code><span class="nt">box</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">a</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6.0 nm</span>
+<span class="w">  </span><span class="nt">b</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6.0 nm</span>
+<span class="w">  </span><span class="nt">c</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6.0 nm</span>
+<span class="w">  </span><span class="c1"># alpha, beta, gamma default to 90</span>
+</code></pre></div>
+<h3 id="coordinates-and-the-box">Coordinates and the box</h3>
+<p><code>coordinates</code> may be any supported coordinate file — <code>.inpcrd</code>/<code>.rst7</code>, <code>.gro</code>, <code>.pdb</code>/<code>.cif</code>, or CHARMM <code>.crd</code> — independent of the topology format, as long as the atom ordering matches. The system is always built from the topology file; the coordinate file only supplies positions and, when it carries one, the periodic box.</p>
+<p>The box used to build the system is resolved in order:</p>
+<ol>
+<li>an explicit <code>box:</code> block (override);</li>
+<li>the box found in the coordinate file (<code>inpcrd</code> / <code>gro</code> / PDB <code>CRYST1</code>);</li>
+<li>the box carried in a <code>restart_from</code> (or previous-stage) state.</li>
+</ol>
+<p>On restart the state's box is also reapplied to the context afterwards, so it is always the box the run actually continues with. AMBER additionally falls back to the box stored in the prmtop; GROMACS and CHARMM topology files carry no box, so they rely on the coordinate file, an explicit <code>box:</code>, or a restart. You only need an explicit <code>box:</code> when none of those provide one — e.g. a bare CHARMM <code>.crd</code> for a periodic system with no restart.</p>
+<p>A few format examples:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">AMBER</label><label for="__tabbed_1_2">OpenMM force field</label><label for="__tabbed_1_3">GROMACS</label><label for="__tabbed_1_4">CHARMM</label><label for="__tabbed_1_5">Restart</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="c1"># prmtop + coordinates (.inpcrd, .rst7, or .pdb)</span>
+<span class="nt">system</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> topology</span><span class="p">:</span><span class="w"> </span><span class="nv">protein.parm7</span><span class="p p-Indicator">,</span><span class="nt"> coordinates</span><span class="p">:</span><span class="w"> </span><span class="nv">protein.inpcrd</span><span class="w"> </span><span class="p p-Indicator">}</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="c1"># the PDB is the topology; coordinates default to it</span>
+<span class="nt">system</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">topology</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">protein.pdb</span>
+<span class="w">  </span><span class="nt">forcefield</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">amber14-all.xml</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">amber14/tip3pfb.xml</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="c1"># top + gro, with the force-field include directory</span>
+<span class="nt">system</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">topology</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">system.top</span>
+<span class="w">  </span><span class="nt">coordinates</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">system.gro</span>
+<span class="w">  </span><span class="nt">include_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/usr/local/gromacs/share/gromacs/top</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="c1"># psf + coordinates + parameter set (box from the PDB&#39;s CRYST1)</span>
+<span class="nt">system</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">topology</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">system.psf</span>
+<span class="w">  </span><span class="nt">coordinates</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">system.pdb</span>
+<span class="w">  </span><span class="nt">parameters</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">charmm22.rtf</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">charmm22.prm</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="c1"># any format; coordinates optional (the state provides positions + box)</span>
+<span class="nt">system</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> topology</span><span class="p">:</span><span class="w"> </span><span class="nv">protein.parm7</span><span class="p p-Indicator">,</span><span class="nt"> restart_from</span><span class="p">:</span><span class="w"> </span><span class="nv">previous_run/production.xml</span><span class="w"> </span><span class="p p-Indicator">}</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">GROMACS and CHARMM input is experimental</p>
+<p>The AMBER and OpenMM force-field paths are the well-tested ones. GROMACS (<code>.top</code>) and CHARMM (<code>.psf</code>) input works in principle but has <strong>not been thoroughly verified</strong> — sanity-check energies and structures before trusting a run.</p>
+<p>Files produced by <strong>CHARMM-GUI</strong> for GROMACS/CHARMM have specifically given trouble (systems blowing apart on minimization). If you build a system with CHARMM-GUI, use the <strong>AMBER-format files</strong> it generates (<code>.parm7</code> + <code>.rst7</code>/<code>.inpcrd</code>) with the AMBER source — those have worked reliably in testing.</p>
+</div>
+<hr />
+<h2 id="system_settings"><code>system_settings</code></h2>
+<p>The arguments passed to <code>createSystem</code> — how non-bonded forces and constraints are computed. These apply to the whole run (the <code>System</code> is rebuilt identically for every stage).</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nonbonded_method</code></td>
+<td><code>NoCutoff</code>, <code>CutoffNonPeriodic</code>, <code>CutoffPeriodic</code>, <code>Ewald</code>, <code>PME</code>, <code>LJPME</code></td>
+<td><code>PME</code></td>
+<td>The non-bonded method. <code>PME</code>/<code>Ewald</code>/<code>LJPME</code>/<code>CutoffPeriodic</code> are periodic and require a box.</td>
+</tr>
+<tr>
+<td><code>nonbonded_cutoff</code></td>
+<td>quantity</td>
+<td><code>1.0 nm</code></td>
+<td>Real-space cutoff (ignored for <code>NoCutoff</code>).</td>
+</tr>
+<tr>
+<td><code>constraints</code></td>
+<td><code>HBonds</code>, <code>AllBonds</code>, <code>HAngles</code>, or null</td>
+<td><code>HBonds</code></td>
+<td>Which bonds/angles are constrained.</td>
+</tr>
+<tr>
+<td><code>rigid_water</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+<td>Keep water rigid regardless of <code>constraints</code>.</td>
+</tr>
+<tr>
+<td><code>hydrogen_mass</code></td>
+<td>quantity</td>
+<td>none</td>
+<td>Hydrogen-mass repartitioning target (enables larger timesteps).</td>
+</tr>
+<tr>
+<td><code>ewald_error_tolerance</code></td>
+<td>float</td>
+<td><code>0.0005</code></td>
+<td>Error tolerance for <code>Ewald</code>/<code>PME</code>/<code>LJPME</code> (ignored otherwise).</td>
+</tr>
+<tr>
+<td><code>switch_distance</code></td>
+<td>quantity</td>
+<td>none</td>
+<td>Distance at which the LJ switching function turns on. None = no switching. Must be &lt; <code>nonbonded_cutoff</code>.</td>
+</tr>
+<tr>
+<td><code>remove_cm_motion</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+<td>Add a center-of-mass motion remover.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="defaults"><code>defaults</code></h2>
+<p>How each stage's simulation is constructed. A fresh <code>Simulation</code> is built for every simulation stage from this block; a stage may override any part of it with its own <code>defaults</code> block (see <a href="#per-stage-defaults-overrides">per-stage overrides</a>).</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>integrator</code></td>
+<td>block</td>
+<td><code>LangevinMiddle</code>, 2 fs, 300 K</td>
+</tr>
+<tr>
+<td><code>barostat</code></td>
+<td>block or null</td>
+<td>none (NVT/NVE)</td>
+</tr>
+<tr>
+<td><code>platform</code></td>
+<td>block</td>
+<td><code>CPU</code>, mixed precision</td>
+</tr>
+</tbody>
+</table>
+<h3 id="integrator"><code>integrator</code></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td><code>LangevinMiddle</code>, <code>Langevin</code>, <code>Verlet</code></td>
+<td><code>LangevinMiddle</code></td>
+<td>Integrator. <code>Verlet</code> is NVE (no thermostat).</td>
+</tr>
+<tr>
+<td><code>timestep</code></td>
+<td>quantity</td>
+<td><code>2 fs</code></td>
+<td>Integration timestep.</td>
+</tr>
+<tr>
+<td><code>temperature</code></td>
+<td>quantity</td>
+<td><code>300 K</code></td>
+<td>Thermostat target (also the barostat's coupling temperature).</td>
+</tr>
+<tr>
+<td><code>friction</code></td>
+<td>quantity</td>
+<td><code>1.0 /ps</code></td>
+<td>Langevin collision frequency (ignored by <code>Verlet</code>).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="barostat"><code>barostat</code></h3>
+<p>Adding a <code>barostat</code> makes the ensemble NPT. It requires a thermostatted integrator (not <code>Verlet</code>) and a periodic <code>nonbonded_method</code>. All types share <code>frequency</code> (steps between volume-move attempts, default <code>25</code>). Pick a type:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Isotropic — scales the box uniformly (the usual choice)</span>
+<span class="nt">barostat</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> type</span><span class="p">:</span><span class="w"> </span><span class="nv">isotropic</span><span class="p p-Indicator">,</span><span class="nt"> pressure</span><span class="p">:</span><span class="w"> </span><span class="nv">1 atm</span><span class="p p-Indicator">,</span><span class="nt"> frequency</span><span class="p">:</span><span class="w"> </span><span class="nv">25</span><span class="w"> </span><span class="p p-Indicator">}</span>
+
+<span class="c1"># Anisotropic — independent pressure per axis, optionally freezing axes</span>
+<span class="nt">barostat</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">anisotropic</span>
+<span class="w">  </span><span class="nt">pressure</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1 atm</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">1 atm</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">1 atm</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">scale_x</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">scale_y</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">scale_z</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="c1"># Membrane — for bilayers, with a surface tension and XY/Z coupling modes</span>
+<span class="nt">barostat</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">membrane</span>
+<span class="w">  </span><span class="nt">pressure</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1 atm</span>
+<span class="w">  </span><span class="nt">surface_tension</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0 bar*nm</span>
+<span class="w">  </span><span class="nt">xy_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">isotropic</span><span class="w">        </span><span class="c1"># isotropic | anisotropic</span>
+<span class="w">  </span><span class="nt">z_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">free</span><span class="w">              </span><span class="c1"># free | fixed | constant_volume</span>
+</code></pre></div>
+<h3 id="platform"><code>platform</code></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td><code>CUDA</code>, <code>OpenCL</code>, <code>CPU</code>, <code>Reference</code></td>
+<td><code>CPU</code></td>
+<td>Compute platform.</td>
+</tr>
+<tr>
+<td><code>precision</code></td>
+<td><code>single</code>, <code>mixed</code>, <code>double</code></td>
+<td><code>mixed</code></td>
+<td>Used by <code>CUDA</code>/<code>OpenCL</code> only.</td>
+</tr>
+<tr>
+<td><code>device_index</code></td>
+<td>string</td>
+<td>none</td>
+<td>GPU selection, e.g. <code>"0"</code> or <code>"0,1"</code> (CUDA/OpenCL only).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="output_dir"><code>output_dir</code></h2>
+<p>Directory for all outputs (default <code>output</code>). The runner creates it, writes a <code>resolved_config.yaml</code> (the full config with every default filled in, for reproducibility), and resolves each stage's reporter/analysis paths relative to it. Each simulation stage also saves its end state as <code>{stage_name}.xml</code> here.</p>
+<p><strong>Resuming.</strong> Re-running into an existing <code>output_dir</code> continues automatically: any simulation stage whose <code>{stage_name}.xml</code> is already present is skipped and its saved state carried forward, so an interrupted run picks up from the last completed stage. State files are written atomically, so a stage interrupted mid-write is treated as incomplete and re-run. The config is assumed unchanged between runs — if you change it, use a fresh <code>output_dir</code> (or delete the old outputs), since stale stages would otherwise be skipped.</p>
+<hr />
+<h2 id="stages"><code>stages</code></h2>
+<p>An ordered list of steps. Every stage has a <code>name</code> (a label, also used for its saved <code>{name}.xml</code>) and a <code>type</code> that selects its behavior. See the <a href="../stages/">Stage types</a> page for the fields of each type.</p>
+<p>Stages fall into two groups:</p>
+<ul>
+<li><strong>Simulation stages</strong> (<code>minimization</code>, <code>dynamics</code>, <code>heat</code>, <code>ramd</code>) advance a freshly-built simulation. They share three optional blocks — <code>defaults</code>, <code>restraints</code>, and <code>reporters</code> — described below.</li>
+<li><strong>Control / analysis stages</strong> (<code>branch</code>, <code>analysis</code>) don't build a simulation; they steer the pipeline or post-process outputs.</li>
+</ul>
+<h3 id="per-stage-defaults-overrides">Per-stage <code>defaults</code> overrides</h3>
+<p>A simulation stage may carry a partial <code>defaults</code> block that overrides the run-wide <code>defaults</code> <em>for that stage only</em>. The merge rules:</p>
+<ul>
+<li><code>integrator</code> and <code>platform</code> merge <strong>field-wise</strong> — only the keys you set change; the rest inherit. So "raise the temperature for this stage" is just <code>defaults: { integrator: { temperature: 310 K } }</code>.</li>
+<li><code>barostat</code> is <strong>whole-replaced</strong> — give a full barostat block to change it, or <code>barostat: null</code> to switch it off (e.g. an NVT equilibration between NPT stages). Omitting it inherits the run-wide barostat.</li>
+</ul>
+<h3 id="restraints"><code>restraints</code></h3>
+<p>A list of restraint forces added to the stage's system at build time and discarded with it (restraints never carry between stages). Currently one type:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">restraints</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">positional</span>
+<span class="w">    </span><span class="nt">selection</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;not</span><span class="nv"> </span><span class="s">water</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">not</span><span class="nv"> </span><span class="s">element</span><span class="nv"> </span><span class="s">H&quot;</span><span class="w">   </span><span class="c1"># mdtraj selection</span>
+<span class="w">    </span><span class="nt">force_constant</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000 kJ/mol/nm^2</span>
+</code></pre></div>
+<p>A <code>positional</code> restraint harmonically tethers the selected atoms to their starting positions (the carried state's positions on a restart, otherwise the input coordinates).</p>
+<h3 id="reporters"><code>reporters</code></h3>
+<p>Output writers attached to a simulation stage. Three kinds, all optional, each taking a <code>file</code> (resolved under <code>output_dir</code>) and an <code>interval</code> in steps:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">reporters</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">trajectory</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> file</span><span class="p">:</span><span class="w"> </span><span class="nv">prod.dcd</span><span class="p p-Indicator">,</span><span class="nt"> interval</span><span class="p">:</span><span class="w"> </span><span class="nv">5000</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="nt">state</span><span class="p">:</span><span class="w">      </span><span class="p p-Indicator">{</span><span class="nt"> file</span><span class="p">:</span><span class="w"> </span><span class="nv">prod.csv</span><span class="p p-Indicator">,</span><span class="nt"> interval</span><span class="p">:</span><span class="w"> </span><span class="nv">1000</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="nt">checkpoint</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> file</span><span class="p">:</span><span class="w"> </span><span class="nv">prod.chk</span><span class="p p-Indicator">,</span><span class="nt"> interval</span><span class="p">:</span><span class="w"> </span><span class="nv">50000</span><span class="w"> </span><span class="p p-Indicator">}</span>
+</code></pre></div>
+<ul>
+<li><strong>trajectory</strong> — coordinates over time. Format inferred from the extension or set with <code>format:</code> (<code>dcd</code>, <code>xtc</code>, <code>pdb</code>, <code>pdbx</code>, <code>hdf5</code>/<code>h5</code>, <code>netcdf</code>/<code>nc</code>). Add <code>selection:</code> (an mdtraj selection) to store only some atoms — supported for <code>dcd</code>, <code>hdf5</code>/<code>h5</code>, <code>netcdf</code>/<code>nc</code> only. The mdtraj-backed formats (<code>dcd</code>, <code>hdf5</code>/<code>h5</code>, <code>netcdf</code>/<code>nc</code>) store coordinates in single precision, so a one-time <code>TypeCastPerformanceWarning</code> about casting <code>float64</code> → <code>float32</code> is expected and harmless; the simulation's own precision is unaffected.</li>
+<li><strong>state</strong> — CSV of step, time, energies, temperature, volume, density, speed.</li>
+<li><strong>checkpoint</strong> — binary checkpoint for restarting.</li>
+</ul>
+<p>A console progress reporter is added automatically and needs no configuration.</p>
+<hr />
+<h2 id="flow-of-information">Flow of information</h2>
+<p>Understanding the order in which things happen clarifies which settings affect what.</p>
+<p><strong>1. Parse and validate.</strong> The YAML is loaded into a Pydantic <code>Config</code>. The <code>system</code> model is chosen from the topology extension; each stage is built into its registered type from its <code>type</code> tag. Unknown keys are rejected. Each simulation stage is then validated against its <em>resolved</em> settings (run <code>defaults</code> merged with the stage's override) — e.g. a barostat is rejected under a <code>Verlet</code> integrator or a non-periodic method.</p>
+<p><strong>2. Set up the run.</strong> The runner creates <code>output_dir</code>, writes <code>resolved_config.yaml</code>, and — if <code>system.restart_from</code> is given — deserializes it into an OpenMM <code>State</code>. That state is the starting point carried into the first stage.</p>
+<p><strong>3. Run each stage in order.</strong> For a <strong>simulation stage</strong>:</p>
+<ul>
+<li>Resolve <code>defaults</code> (run-wide merged with the stage's override).</li>
+<li>Build a <em>fresh</em> <code>Simulation</code>: the <code>System</code> from the <code>system</code> source (plus the resolved <code>barostat</code> and the stage's <code>restraints</code>), the integrator and platform from the resolved <code>defaults</code>.</li>
+<li>Seed the context — from the carried <code>State</code> (positions, velocities, box) if there is one, otherwise from the input files. The step counter and clock are reset to zero.</li>
+<li>Run the stage (<code>run</code> only advances <code>runner.simulation</code>).</li>
+<li>Capture the end <code>State</code> (positions + velocities + box) and save it as <code>{name}.xml</code>.</li>
+</ul>
+<p>A <strong><code>branch</code></strong> stage instead re-runs all <em>following</em> stages <code>count</code> times, each starting from the current state, in <code>{name}_{i}</code> subdirectories. An <strong><code>analysis</code></strong> stage runs without building a simulation and leaves the carried state unchanged.</p>
+<p><strong>4. What carries between stages.</strong> Only the OpenMM <code>State</code> — positions, velocities, and box vectors — flows from one stage to the next. Forces do <strong>not</strong>: the system, barostat, and restraints are rebuilt fresh each stage from that stage's resolved config. So a restraint or barostat applied in one stage has no effect on the next unless that stage declares it too. This is what makes a workflow like <em>minimize → restrained heat → unrestrained NPT equilibration → production</em> behave exactly as written, with each stage's forces being precisely what its config specifies.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "toc.follow", "content.code.copy", "content.code.annotate", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
