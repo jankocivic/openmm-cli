@@ -1,0 +1,1103 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+        <link rel="next" href="configuration/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>openmm-cli</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#openmm-cli" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="openmm-cli" class="md-header__button md-logo" aria-label="openmm-cli" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            openmm-cli
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Home
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jankocivic/openmm-cli" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="openmm-cli" class="md-nav__button md-logo" aria-label="openmm-cli" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    openmm-cli
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jankocivic/openmm-cli" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-with-conda" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install with conda
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-openmm-cant-be-installed-from-pypi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If OpenMM can't be installed from PyPI
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-a-stage-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding a stage type
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-a-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding a command
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related projects
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acknowledgements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Acknowledgements
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Configuration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="stages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stage types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Features
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-with-conda" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install with conda
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-openmm-cant-be-installed-from-pypi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If OpenMM can't be installed from PyPI
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-a-stage-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding a stage type
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-a-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding a command
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-projects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related projects
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acknowledgements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Acknowledgements
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="openmm-cli">openmm-cli</h1>
+<p><a href="https://jankocivic.github.io/openmm-cli/"><img alt="docs" src="https://img.shields.io/badge/docs-online-blue" /></a></p>
+<p>A command-line interface for running molecular dynamics simulations with OpenMM, without writing Python.</p>
+<p><code>openmm-cli</code> runs a full simulation workflow (minimization, heating, equilibration, production, and trajectory analysis) from one YAML file. Describe the simulation in the configuration file and the CLI does the rest. The field names are plain (<code>temperature: 300 K</code>, <code>nonbonded_method: PME</code>, <code>pressure: 1 atm</code>), which is easier to read than the short keywords used in other MD packages. The YAML file also serves as a record for future reproducibility.</p>
+<blockquote>
+<p><strong>Status: project in very early stage.</strong> Report any bug as an issue.</p>
+</blockquote>
+<hr />
+<h2 id="features">Features</h2>
+<ul>
+<li>Run a full MD workflow from a single YAML config (minimize → heat → equilibrate → production)</li>
+<li>AMBER (<code>.parm7</code> / <code>.prmtop</code>) and OpenMM force field (PDB/PDBx topology + force field XMLs) inputs, plus experimental, not-yet-thoroughly-verified GROMACS (<code>.top</code> + <code>.gro</code>) and CHARMM (<code>.psf</code> + parameter set) support</li>
+<li>Supports restraints</li>
+<li>Restart from saved states</li>
+<li>Trajectory analysis and processing commands (RMSD, RMSF, distances, dihedrals, H-bonds, imaging, centering, stripping, format conversion)</li>
+<li>System preparation commands (PDB cleanup, solvation, ion placement)</li>
+<li>Optional web dashboard for browsing simulation outputs</li>
+<li>Built on <a href="https://openmm.org">OpenMM</a> and <a href="https://mdtraj.org">MDTraj</a></li>
+</ul>
+<hr />
+<h2 id="installation">Installation</h2>
+<p><a href="https://docs.astral.sh/uv/"><code>uv</code></a> is the recommended way to install <code>openmm-cli</code> (uv can be installed with <code>curl -LsSf https://astral.sh/uv/install.sh | sh</code> on Linux or macOS).</p>
+<p>Then run:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/jankocivic/openmm-cli.git
+<span class="nb">cd</span><span class="w"> </span>openmm-cli
+uv<span class="w"> </span>sync
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate<span class="w"> </span><span class="c1"># Activate virtual environment, should be done every terminal session</span>
+python<span class="w"> </span>-m<span class="w"> </span>openmm.testInstallation<span class="w"> </span><span class="c1"># Verify if OpenMM is installed properly</span>
+</code></pre></div>
+<p>For the optional web dashboard:</p>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>sync<span class="w"> </span>--extra<span class="w"> </span>dashboard
+</code></pre></div>
+<p>Enable autocompletion of commands:</p>
+<div class="highlight"><pre><span></span><code>openmm-cli<span class="w"> </span>--install-completion<span class="w"> </span><span class="c1"># Applies only after restarting the terminal</span>
+</code></pre></div>
+<h3 id="install-with-conda">Install with conda</h3>
+<p>Create a conda environment and install with pip (add <code>[dashboard]</code> for the optional web dashboard):</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/jankocivic/openmm-cli.git
+<span class="nb">cd</span><span class="w"> </span>openmm-cli
+conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>openmm-cli<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.12
+conda<span class="w"> </span>activate<span class="w"> </span>openmm-cli
+pip<span class="w"> </span>install<span class="w"> </span>.<span class="w">              </span><span class="c1"># or: pip install &quot;.[dashboard]&quot;</span>
+python<span class="w"> </span>-m<span class="w"> </span>openmm.testInstallation<span class="w"> </span><span class="c1"># Verify if OpenMM is installed properly</span>
+</code></pre></div>
+<h3 id="if-openmm-cant-be-installed-from-pypi">If OpenMM can't be installed from PyPI</h3>
+<p>If <code>uv</code> or <code>pip</code> can't find a working OpenMM (e.g. no compatible wheel, or the CUDA version doesn't match your GPU driver — check with <code>nvidia-smi</code>), install everything from conda-forge, pinning the CUDA version, and add the package with <code>--no-deps</code>:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/jankocivic/openmm-cli.git
+<span class="nb">cd</span><span class="w"> </span>openmm-cli
+conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>openmm-cli<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.12<span class="w"> </span>openmm<span class="w"> </span>mdtraj<span class="w"> </span>pdbfixer<span class="w"> </span>numpy<span class="w"> </span>pydantic<span class="w"> </span>pyyaml<span class="w"> </span>typer<span class="w"> </span>cuda-version<span class="o">=</span><span class="m">12</span>.4
+conda<span class="w"> </span>activate<span class="w"> </span>openmm-cli
+python<span class="w"> </span>-m<span class="w"> </span>openmm.testInstallation<span class="w"> </span><span class="c1"># Verify if OpenMM is installed properly</span>
+pip<span class="w"> </span>install<span class="w"> </span>.<span class="w"> </span>--no-deps
+</code></pre></div>
+<p>For the dashboard on this path, also add <code>streamlit plotly pandas</code> to the conda env. <code>--no-deps</code> stops pip from re-resolving the dependencies and pulling mismatched copies from PyPI.</p>
+<blockquote>
+<p><strong>Note:</strong> <code>openmm-cli</code> has so far only been tested on Linux. It should work on macOS, but not verified.</p>
+</blockquote>
+<hr />
+<h2 id="quick-start">Quick Start</h2>
+<p>See <code>openmm-cli --help</code>, <code>openmm-cli trajectory --help</code> and <code>openmm-cli prepare --help</code> for the full command list.</p>
+<p>For running an MD simulation protocol write a <code>config.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">system</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">topology</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">protein.parm7</span>
+<span class="w">  </span><span class="nt">coordinates</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">protein.inpcrd</span>
+
+<span class="nt">defaults</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">integrator</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LangevinMiddle</span>
+<span class="w">    </span><span class="nt">timestep</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2 fs</span>
+<span class="w">    </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300 K</span>
+<span class="w">  </span><span class="nt">barostat</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">isotropic</span>
+<span class="w">    </span><span class="nt">pressure</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1 atm</span>
+<span class="w">    </span><span class="nt">frequency</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span>
+
+<span class="nt">output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">output</span>
+
+<span class="nt">stages</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">minimize</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">minimization</span>
+<span class="w">    </span><span class="nt">max_iterations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5000</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dynamics</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2500000</span>
+<span class="w">    </span><span class="nt">randomize_velocities</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300 K</span>
+<span class="w">    </span><span class="nt">reporters</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">trajectory</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> file</span><span class="p">:</span><span class="w"> </span><span class="nv">prod.dcd</span><span class="p p-Indicator">,</span><span class="nt"> interval</span><span class="p">:</span><span class="w"> </span><span class="nv">5000</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="w">      </span><span class="nt">state</span><span class="p">:</span><span class="w">      </span><span class="p p-Indicator">{</span><span class="nt"> file</span><span class="p">:</span><span class="w"> </span><span class="nv">prod.csv</span><span class="p p-Indicator">,</span><span class="nt"> interval</span><span class="p">:</span><span class="w"> </span><span class="nv">1000</span><span class="w"> </span><span class="p p-Indicator">}</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rmsd</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">analysis</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rmsd</span>
+<span class="w">    </span><span class="nt">args</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">trajectory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prod.dcd</span>
+<span class="w">      </span><span class="nt">top</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../protein.parm7</span>
+<span class="w">      </span><span class="nt">sel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;name</span><span class="nv"> </span><span class="s">CA&quot;</span>
+<span class="w">      </span><span class="nt">out</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rmsd.csv</span>
+</code></pre></div>
+<p>Run it:</p>
+<div class="highlight"><pre><span></span><code>openmm-cli<span class="w"> </span>run<span class="w"> </span>config.yaml
+</code></pre></div>
+<p>Analyze the resulting trajectory:</p>
+<div class="highlight"><pre><span></span><code>openmm-cli<span class="w"> </span>trajectory<span class="w"> </span>info<span class="w">     </span>output/prod.dcd<span class="w"> </span>--top<span class="w"> </span>protein.parm7
+openmm-cli<span class="w"> </span>trajectory<span class="w"> </span>rmsd<span class="w">     </span>output/prod.dcd<span class="w"> </span>--top<span class="w"> </span>protein.parm7<span class="w"> </span>--sel<span class="w"> </span><span class="s2">&quot;name CA&quot;</span>
+openmm-cli<span class="w"> </span>trajectory<span class="w"> </span>distance<span class="w"> </span>output/prod.dcd<span class="w"> </span>--top<span class="w"> </span>protein.parm7<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--a<span class="w"> </span><span class="s2">&quot;resname LIG&quot;</span><span class="w"> </span>--b<span class="w"> </span><span class="s2">&quot;resid 42 and name CA&quot;</span>
+</code></pre></div>
+<hr />
+<h2 id="configuration">Configuration</h2>
+<p>A run is described by one YAML file. The <a href="#quick-start">Quick Start</a> above is a complete example; for every available key, see the reference pages:</p>
+<ul>
+<li><strong><a href="configuration/">Configuration reference</a></strong> — the <code>system</code> inputs, <code>system_settings</code>, <code>defaults</code> (integrator, barostat, platform), reporters, restraints, and how information flows through a run.</li>
+<li><strong><a href="stages/">Stage types</a></strong> — the fields and behavior of each stage: <code>minimization</code>, <code>dynamics</code>, <code>heat</code>, <code>ramd</code>, <code>branch</code> (replicas), and <code>analysis</code>.</li>
+</ul>
+<hr />
+<h2 id="examples">Examples</h2>
+<p>The <code>examples/</code> directory contains complete, runnable workflows you can use as starting points:</p>
+<ul>
+<li><strong><code>examples/253L/</code></strong> — T4 lysozyme L99A starting from a raw PDB. Demonstrates the full pipeline: <code>prepare clean</code> → <code>prepare solvate</code> → <code>run</code> with a multi-stage MD protocol (minimize → heat → equilibrate → production) and analysis (RMSD, H-bonds). Uses an OpenMM force field; no external programs necessary.</li>
+<li><strong><code>examples/Amber_FP/</code></strong> — fluorescent protein starting from a pre-built AMBER topology (<code>parm7</code> + <code>pdb</code>). Same MD protocol as 253L, but skips the preparation stage since the system is already parametrised.</li>
+</ul>
+<p>Each example has a <code>README.md</code> explaining the workflow, a <code>config.yaml</code>, and a <code>run.sh</code> that runs the full pipeline.</p>
+<hr />
+<h2 id="dashboard">Dashboard</h2>
+<p><code>openmm-cli</code> includes an optional Streamlit dashboard for browsing simulation outputs. After installing the extra, launch it pointing at any directory containing CSV files:</p>
+<div class="highlight"><pre><span></span><code>openmm-cli<span class="w"> </span>dashboard<span class="w">                  </span><span class="c1"># current directory</span>
+openmm-cli<span class="w"> </span>dashboard<span class="w"> </span>examples/253L/output
+</code></pre></div>
+<p>The dashboard reads every CSV in the directory and plots its numeric columns over time (energies, temperature, density, RMSD, etc.). Non-time-series files like H-bond inventories or RMSF results render as sortable tables.</p>
+<hr />
+<h2 id="adding-a-stage-type">Adding a stage type</h2>
+<p>Stages are auto-discovered from <code>src/openmm_cli/commands/run/stage_types/</code> — drop a module there with a <code>@register_stage</code>-decorated <code>StageBase</code> subclass and nothing else needs to change.</p>
+<p>Subclass <code>SimulationStage</code> for stages that drive the simulation: the runner builds a fresh simulation for each (run <code>defaults</code> + the stage's optional <code>defaults</code> override + its <code>restraints</code>) and saves the end state, so <code>run</code> only advances <code>runner.simulation</code>. Every <code>SimulationStage</code> already defines <code>name</code>, an optional <code>defaults</code> override, <code>restraints</code>, and <code>reporters</code> — so you only add the fields specific to your stage.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># src/openmm_cli/commands/run/stage_types/my_stage.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Literal</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimulationStage</span><span class="p">,</span> <span class="n">register_stage</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">..runner</span><span class="w"> </span><span class="kn">import</span> <span class="n">Runner</span>
+
+
+<span class="nd">@register_stage</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyStage</span><span class="p">(</span><span class="n">SimulationStage</span><span class="p">):</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;my_stage&quot;</span><span class="p">]</span>   <span class="c1"># unique YAML `type:` tag</span>
+    <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span>                  <span class="c1"># add any config fields you need</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner</span><span class="p">:</span> <span class="s2">&quot;Runner&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">runner</span><span class="o">.</span><span class="n">simulation</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">)</span>
+</code></pre></div>
+<p>Then use it in a config: <code>- {name: relax, type: my_stage, steps: 1000}</code>. A stage that only post-processes outputs (no simulation) subclasses <code>StageBase</code> directly instead.</p>
+<p>For methods that need to construct the simulation differently — e.g. metadynamics or free-energy setups that add forces before the context, or step via their own helper — override <code>build(self, cfg, defaults, state)</code>. By default it builds the standard simulation; override it to assemble a custom one (reusing <code>cfg.system.build</code> / <code>defaults.integrator.build</code> / <code>defaults.platform.build</code>).</p>
+<p>To reject incoherent configs up front, override <code>validate_resolved(self, defaults, system_settings)</code>. It runs at config-load time against the stage's <em>resolved</em> settings (run <code>defaults</code> merged with the stage's override). Call <code>super().validate_resolved(...)</code> to keep the shared checks (a barostat needs a thermostatted, periodic system) and add your own — this keeps each stage's validation in its own file rather than in the central config.</p>
+<hr />
+<h2 id="adding-a-command">Adding a command</h2>
+<p>Commands are auto-discovered from <code>src/openmm_cli/commands/</code>. The discovery rule is uniform at every level:</p>
+<ul>
+<li>A <code>.py</code> file in <code>commands/</code> becomes a <strong>top-level command</strong> (<code>openmm-cli &lt;name&gt;</code>).</li>
+<li>A folder in <code>commands/</code> whose <code>__init__.py</code> exposes a <code>command</code> function is <strong>also a top-level command</strong> — useful when the command needs supporting modules of its own (this is how <code>run/</code> works).</li>
+<li>A folder in <code>commands/</code> whose <code>__init__.py</code> does <em>not</em> expose <code>command</code> becomes a <strong>subgroup</strong>; each <code>.py</code> file inside becomes a subcommand (<code>openmm-cli &lt;group&gt; &lt;name&gt;</code>).</li>
+<li>Files and folders starting with <code>_</code> are skipped.</li>
+</ul>
+<p>Example of a new subcommand of the trajectory command:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># src/openmm_cli/commands/trajectory/my_analysis.py</span>
+<span class="sd">&quot;&quot;&quot;Short description of what the command does.&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">mdtraj</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">md</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typer</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">command</span><span class="p">(</span>
+    <span class="n">trajectory</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">typer</span><span class="o">.</span><span class="n">Argument</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Input trajectory.&quot;</span><span class="p">)],</span>
+    <span class="n">topology</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">typer</span><span class="o">.</span><span class="n">Option</span><span class="p">(</span><span class="s2">&quot;--top&quot;</span><span class="p">)],</span>
+    <span class="n">selection</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typer</span><span class="o">.</span><span class="n">Option</span><span class="p">(</span><span class="s2">&quot;--sel&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="s2">&quot;name CA&quot;</span><span class="p">,</span>
+    <span class="n">output</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">typer</span><span class="o">.</span><span class="n">Option</span><span class="p">(</span><span class="s2">&quot;--out&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;my_analysis.csv&quot;</span><span class="p">),</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;One-line summary used as the command&#39;s --help description.&quot;&quot;&quot;</span>
+    <span class="n">traj</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">trajectory</span><span class="p">),</span> <span class="n">top</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">topology</span><span class="p">))</span>
+    <span class="c1"># ... your logic here</span>
+</code></pre></div>
+<p>No <code>cli.py</code> edits required. The new command appears as <code>openmm-cli trajectory my_analysis</code>. Name the function <code>command</code> (auto-discovery looks for this attribute), reuse flag names across commands (<code>--top</code>, <code>--out</code>, <code>--sel</code>, <code>--ref</code>), and add a docstring to each group's <code>__init__.py</code> (it becomes the group's <code>--help</code> text).</p>
+<hr />
+<h2 id="related-projects">Related projects</h2>
+<p><code>openmm-cli</code> is inspired by <a href="https://github.com/insilichem/ommprotocol"><strong>OMMProtocol</strong></a>, which also drives OpenMM through a YAML config organized into stages. Differences from OMMProtocol: <code>openmm-cli</code> is built on a modern Python stack (Pydantic for config validation, Typer for the CLI), integrates preparation and trajectory analysis as commands, and is structured so new commands can be added by dropping a single file into the right folder.</p>
+<hr />
+<h2 id="acknowledgements">Acknowledgements</h2>
+<p>Built on <a href="https://openmm.org">OpenMM</a> for the simulation engine, <a href="https://mdtraj.org">mdtraj</a> for trajectory analysis, <a href="https://github.com/openmm/pdbfixer">PDBFixer</a> for system preparation, <a href="https://pydantic.dev">Pydantic</a> for config validation, and <a href="https://typer.tiangolo.com">Typer</a> for the CLI.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "toc.follow", "content.code.copy", "content.code.annotate", "search.suggest", "search.highlight"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
